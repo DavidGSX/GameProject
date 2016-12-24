@@ -31,8 +31,8 @@ func NewResult(l *common.Linker) *Result {
 
 func (p *Result) Process() {
 	o := new(common.Octets)
-	o.CompactUint32(uint32(p.GetType())) //type
-	o.MarshalBytes(p.Marshal().GetBuf()) //size
+	o.CompactUint32(uint32(p.GetType()))
+	o.MarshalBytes(p.Marshal().GetBuf())
 	p.l.Send(o.GetBuf())
 }
 

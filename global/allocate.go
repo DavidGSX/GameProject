@@ -2,7 +2,6 @@ package global
 
 import (
 	"gameproject/common"
-	"log"
 )
 
 type Allocate struct {
@@ -19,23 +18,23 @@ func (p *Allocate) Clone() common.IProtocal {
 
 func (p *Allocate) Process() {
 	r := NewResult(p.l)
+	/*
+		conn, err := common.GetDBPool().Get()
+		if err != nil {
+			log.Panic("Allocate Process Conn Get Error", err)
+		}
+		defer common.GetDBPool().Put(conn)
 
-	conn, err := common.GetDBPool().Get()
-	if err != nil {
-		log.Panic("Allocate Process Conn Get Error", err)
-	}
-	defer common.GetDBPool().Put(conn)
+		resp, err := conn.Cmd("HSET", p.group, p.name, "1").Int()
+		if err != nil {
+			log.Panic("Allocate Process Cmd Error ", err)
+		}
 
-	resp, err := conn.Cmd("HSET", p.group, p.name, "1").Int()
-	if err != nil {
-		log.Panic("Allocate Process Cmd Error ", err)
-	}
-
-	if resp == 1 {
-		r.SetRes(RPC_OK)
-	} else {
-		r.SetRes(RPC_DUPLICATE)
-	}
-
+		if resp == 1 {
+			r.SetRes(RPC_OK)
+		} else {
+			r.SetRes(RPC_DUPLICATE)
+		}
+	*/
 	r.Process()
 }

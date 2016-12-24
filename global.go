@@ -5,7 +5,7 @@ import (
 	"gameproject/global"
 )
 
-func main() {
+func main1() {
 	go common.NetRpc("0.0.0.0", "1234")
 	common.GetProtoMgr().Add(1, new(global.Exist))
 	common.GetProtoMgr().Add(2, new(global.Allocate))
@@ -16,7 +16,7 @@ func main() {
 
 /*
 import (
-	"common"
+	"gameproject/common"
 	"log"
 	"net"
 	"unicode/utf16"

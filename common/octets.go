@@ -1,7 +1,9 @@
 package common
 
 import (
+	"bytes"
 	"log"
+	"math"
 )
 
 type Octets struct {
@@ -14,6 +16,10 @@ func NewOctets(x []byte) *Octets {
 	o := new(Octets)
 	o.buf = x
 	return o
+}
+
+func (o *Octets) Equals(p *Octets) bool {
+	return bytes.Equal(o.buf, p.buf) && o.pos == p.pos && o.tranpos == p.tranpos
 }
 
 func (o *Octets) GetBuf() []byte {
@@ -111,18 +117,32 @@ func (o *Octets) UnmarshalUint64() uint64 {
 	v1 := uint64(o.buf[o.pos+1])
 	v2 := uint64(o.buf[o.pos+2])
 	v3 := uint64(o.buf[o.pos+3])
-	v4 := uint64(o.buf[o.pos])
-	v5 := uint64(o.buf[o.pos+1])
-	v6 := uint64(o.buf[o.pos+2])
-	v7 := uint64(o.buf[o.pos+3])
+	v4 := uint64(o.buf[o.pos+4])
+	v5 := uint64(o.buf[o.pos+5])
+	v6 := uint64(o.buf[o.pos+6])
+	v7 := uint64(o.buf[o.pos+7])
 	o.pos += 8
 	return (v0 << 56) | (v1 << 48) | (v2 << 40) | (v3 << 32) | (v4 << 24) | (v5 << 16) | (v6 << 8) | v7
 }
 
 func (o *Octets) MarshalFloat32(x float32) {
+	v := math.Float32bits(x)
+	o.MarshalUint32(v)
+}
+
+func (o *Octets) UnmarshalFloat32() float32 {
+	v := o.UnmarshalUint32()
+	return math.Float32frombits(v)
 }
 
 func (o *Octets) MarshalFloat64(x float64) {
+	v := math.Float64bits(x)
+	o.MarshalUint64(v)
+}
+
+func (o *Octets) UnmarshalFloat64() float64 {
+	v := o.UnmarshalUint64()
+	return math.Float64frombits(v)
 }
 
 func (o *Octets) MarshalBytes(x []byte) {
@@ -142,7 +162,7 @@ func (o *Octets) UnmarshalBytes() []byte {
 }
 
 func (o *Octets) MarshalUint16s(x []uint16) {
-	o.CompactUint32(uint32(len(x)))
+	o.CompactUint32(uint32(len(x) * 2))
 	for i := 0; i < len(x); i++ {
 		low := byte(x[i] & 0xff)
 		high := byte(x[i] >> 8)
