@@ -1,0 +1,31 @@
+package manager
+
+import (
+	"gameproject/global/config"
+	"io"
+	"log"
+	"net/http"
+	"strconv"
+)
+
+func InitHttpCallback(cfg *config.GlobalConfig) {
+	ip := cfg.HttpConfig.CallbackIP
+	port := cfg.HttpConfig.CallbackPort
+
+	http.HandleFunc("/", CallbackServer)
+
+	err := http.ListenAndServe(ip+":"+strconv.Itoa(port), nil)
+	if err != nil {
+		log.Fatal("HttpCallback Listen Error:", err)
+	}
+}
+
+func CallbackServer(w http.ResponseWriter, req *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("handleHttpCallback -> ", err)
+		}
+	}()
+
+	io.WriteString(w, "Hello World!")
+}
