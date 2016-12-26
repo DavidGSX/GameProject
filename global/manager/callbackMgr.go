@@ -14,10 +14,12 @@ func InitHttpCallback(cfg *config.GlobalConfig) {
 
 	http.HandleFunc("/", CallbackServer)
 
+	log.Println("HttpCallback Listen ", ip, port)
 	err := http.ListenAndServe(ip+":"+strconv.Itoa(port), nil)
 	if err != nil {
 		log.Fatal("HttpCallback Listen Error:", err)
 	}
+
 }
 
 func CallbackServer(w http.ResponseWriter, req *http.Request) {

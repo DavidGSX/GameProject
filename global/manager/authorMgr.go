@@ -8,13 +8,13 @@ import (
 )
 
 func InitAuthor(cfg *config.GlobalConfig) {
-	ip := cfg.HttpConfig.CallbackIP
-	port := cfg.HttpConfig.CallbackPort
+	ip := cfg.HttpConfig.AuthorizeIP
+	port := cfg.HttpConfig.AuthorizePort
 	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(port))
 	if err != nil {
 		log.Fatal("Author Listen Error:", err)
 	}
-
+	log.Println("Author Listen ", ip, port)
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println("Author Error -> ", err)

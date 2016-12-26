@@ -5,17 +5,21 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"strings"
 	"sync"
 )
 
-func InitJMX(cfg *config.GlobalConfig, wg sync.WaitGroup) {
-	ip := cfg.HttpConfig.CallbackIP
-	port := cfg.HttpConfig.CallbackPort
+var jmxWG *sync.WaitGroup
+
+func InitJMX(cfg *config.GlobalConfig, wg *sync.WaitGroup) {
+	ip := cfg.HttpConfig.JMXIP
+	port := cfg.HttpConfig.JMXPort
 	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(port))
 	if err != nil {
 		log.Fatal("JMX Listen Error:", err)
 	}
-
+	log.Println("JMX Listen ", ip, port)
+	jmxWG = wg
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println("JMX Error -> ", err)
@@ -27,7 +31,7 @@ func InitJMX(cfg *config.GlobalConfig, wg sync.WaitGroup) {
 		if err != nil {
 			log.Panic("JMX Accept Error:", err)
 		}
-		go handleAuthor(conn)
+		go handleJMX(conn)
 	}
 }
 
@@ -41,15 +45,29 @@ func handleJMX(conn net.Conn) {
 	}()
 	log.Println("handleJMX connected", conn.RemoteAddr().String())
 
-	buffer := make([]byte, 0)
 	for {
 		reader := make([]byte, 1024)
 		n, err := conn.Read(reader)
 		if err != nil {
 			log.Panic("Read Error:", err)
 		}
-		buffer = append(buffer, reader[:n]...)
-		//log.Println(n, reader)
 
+		if n > 0 {
+			cmd := string(reader[:n])
+			cmd = strings.Trim(cmd, "\r\n")
+			log.Println(n, reader[:n], cmd)
+			switch cmd {
+			case "stop":
+				jmxWG.Done()
+			case "reload":
+				if config.ReloadConfig() == nil {
+					GetPlatMgr().LoadCfg(config.GetConfig())
+				}
+			case "q":
+				log.Panic("JMX Quit")
+			default:
+				log.Println("Unknow JMX Command ", cmd)
+			}
+		}
 	}
 }
