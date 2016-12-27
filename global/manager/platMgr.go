@@ -4,26 +4,32 @@ import (
 	"gameproject/global/config"
 	"gameproject/global/plat"
 	"log"
+	"net/url"
+	"strings"
 	"sync"
 )
 
 var platMgr *PlatMgr
-var l sync.Mutex
+var platMgrLock sync.RWMutex
 
 type PlatMgr struct {
-	classMap   map[string]plat.IClass
-	configMap  map[int]config.PlatConfig
-	platSetMap map[int]*PlatSet
+	classMap    map[string]plat.IClass
+	configMap   map[int]config.PlatConfig
+	authorMap   map[string]plat.IClass
+	callbackMap map[string]plat.IClass
+	platSetMap  map[int]config.PlatSet
 }
 
 func GetPlatMgr() *PlatMgr {
-	l.Lock()
-	defer l.Unlock()
+	platMgrLock.Lock()
+	defer platMgrLock.Unlock()
 	if platMgr == nil {
 		platMgr = new(PlatMgr)
 		platMgr.classMap = make(map[string]plat.IClass)
 		platMgr.configMap = make(map[int]config.PlatConfig)
-		platMgr.platSetMap = make(map[int]*PlatSet)
+		platMgr.authorMap = make(map[string]plat.IClass)
+		platMgr.callbackMap = make(map[string]plat.IClass)
+		platMgr.platSetMap = make(map[int]config.PlatSet)
 	}
 	return platMgr
 }
@@ -43,8 +49,6 @@ func (this *PlatMgr) InitClass() {
 }
 
 func (this *PlatMgr) AddClass(name string, class plat.IClass) {
-	l.Lock()
-	defer l.Unlock()
 	if this == nil || name == "" || class == nil {
 		log.Panic("PlatMgr.AddClass this or name or class is nil!")
 	}
@@ -64,9 +68,9 @@ func (this *PlatMgr) LoadCfg(cfg *config.GlobalConfig) error {
 		log.Panic("PlatMgr.LoadCfg cfg is nil")
 	}
 
-	l.Lock()
+	platMgrLock.Lock()
 	defer func() {
-		l.Unlock()
+		platMgrLock.Unlock()
 		if err := recover(); err != nil {
 			log.Println("----------PlatMgr.LoadCfg Error:", err)
 		}
@@ -83,46 +87,73 @@ func (this *PlatMgr) LoadCfg(cfg *config.GlobalConfig) error {
 		v.Show("")
 	}
 
-	this.LoadPlatSet(tmpCfgMap, cfg)
+	tmpAuthorMap := make(map[string]plat.IClass)
+	tmpCallbackMap := make(map[string]plat.IClass)
+	for _, v := range cfg.PlatConfigs {
+		author := v.Author
+		_, ok := tmpAuthorMap[author]
+		if ok {
+			log.Panic("PlatMgr.LoadCfg plat author duplicate, author:", author)
+		}
+
+		callback := v.CallbackUrl
+		_, ok = tmpCallbackMap[callback]
+		if ok && callback != "" {
+			log.Panic("PlatMgr.LoadCfg plat callback duplicate, callback:", callback)
+		}
+
+		c, ok := this.classMap[v.ClassName]
+		if ok == false {
+			log.Panic("PlatMgr.LoadCfg class not exist:", v.ClassName)
+		}
+
+		class := c.Clone()
+		class.Init(&v)
+		tmpAuthorMap[author] = class
+		if callback != "" {
+			tmpCallbackMap[callback] = class
+		}
+	}
+
+	this.LoadPlatSet(cfg)
 
 	this.configMap = tmpCfgMap
+	this.authorMap = tmpAuthorMap
+	this.callbackMap = tmpCallbackMap
 	return nil
 }
 
 // 加载所有的PlatSetInfo到Map中，并初始化处理的class，用SetID作为唯一标记
-func (this *PlatMgr) LoadPlatSet(tmpCfgMap map[int]config.PlatConfig, cfg *config.GlobalConfig) {
+func (this *PlatMgr) LoadPlatSet(cfg *config.GlobalConfig) {
 	if cfg == nil {
 		log.Panic("PlatMgr.LoadPlatSet cfg is nil")
 	}
 
-	tmpPlatSet := make(map[int]*PlatSet)
+	tmpPlatSet := make(map[int]config.PlatSet)
 	for _, v := range cfg.PlatSetInfo {
 		id := v.SetID
 		_, ok := tmpPlatSet[id]
 		if ok {
 			log.Panic("PlatMgr.LoadPlatSet set id duplicate, id:", id)
 		}
-		platSet := new(PlatSet)
-		platSet.InitCfg(this, tmpCfgMap, &v)
-		tmpPlatSet[id] = platSet
+		tmpPlatSet[id] = v
 		v.Show("")
 	}
 
 	this.platSetMap = tmpPlatSet
 }
 
-func (this *PlatMgr) ClonePlatByID(tmpCfgMap map[int]config.PlatConfig, id int) (string, string, plat.IClass) {
-	v, ok := tmpCfgMap[id]
+func (this *PlatMgr) ProcessCallback(path string, param url.Values) string {
+	platMgrLock.RLock()
+	defer platMgrLock.RUnlock()
+
+	log.Println("path:", path, " param:", param)
+	callback := strings.TrimPrefix(path, "/")
+	class, ok := this.callbackMap[callback]
 	if ok == false {
-		log.Panic("PlatMgr.ClonePlatByID not exist id:", id)
+		log.Println("PlatMgr.ProcessCallback plat not exist, callback:", callback)
+		return string("Invalid URI.Path " + path)
 	}
 
-	c, ok := this.classMap[v.ClassName]
-	if ok == false {
-		log.Panic("PlatMgr.ClonePlatByID not exist class:", v.ClassName)
-	}
-
-	class := c.Clone()
-	class.Init(&v)
-	return v.Author, v.CallbackUrl, class
+	return class.Callback(param)
 }

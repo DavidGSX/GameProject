@@ -25,9 +25,11 @@ func InitHttpCallback(cfg *config.GlobalConfig) {
 func CallbackServer(w http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println("handleHttpCallback -> ", err)
+			log.Println("CallbackServer -> ", err)
 		}
 	}()
 
-	io.WriteString(w, "Hello World!")
+	req.ParseForm()
+	result := GetPlatMgr().ProcessCallback(req.URL.Path, req.Form)
+	io.WriteString(w, result)
 }

@@ -3,10 +3,11 @@ package plat
 import (
 	"gameproject/global/config"
 	"log"
+	"net/url"
 )
 
 /*
-	Author    string // 平台类型，填账号的后缀
+	Author    	string // 平台类型，填账号的后缀
 	CallbackUrl string // 平台充值回调的标记
 	LoginUrl    string // 登录认证用的Url
 	AppID       string // 游戏在渠道平台注册后的ID
@@ -63,6 +64,15 @@ func (this *OneSdk) Authorize(uid, token string) {
 
 }
 
-func (this *OneSdk) Callback(msg string) {
+func (this *OneSdk) Callback(param url.Values) string {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("OneSdk.Callback -> ", err)
+		}
+	}()
 
+	log.Println("gameid:", param.Get("gameid"))
+	log.Println("userid:", param.Get("userid"))
+
+	return "OneSdk Callback"
 }

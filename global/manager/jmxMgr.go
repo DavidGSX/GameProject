@@ -56,17 +56,22 @@ func handleJMX(conn net.Conn) {
 			cmd := string(reader[:n])
 			cmd = strings.Trim(cmd, "\r\n")
 			log.Println(n, reader[:n], cmd)
-			switch cmd {
+			switch strings.ToLower(cmd) {
 			case "stop":
 				jmxWG.Done()
 			case "reload":
-				if config.ReloadConfig() == nil {
+				if config.ReloadConfig() == true {
 					GetPlatMgr().LoadCfg(config.GetConfig())
+					log.Println(cmd + " success!")
+					conn.Write([]byte(cmd + " success!\n"))
+				} else {
+					log.Println(cmd + " failed!")
+					conn.Write([]byte(cmd + " failed!\n"))
 				}
 			case "q":
 				log.Panic("JMX Quit")
 			default:
-				log.Println("Unknow JMX Command ", cmd)
+				conn.Write([]byte("Unknow Command " + cmd + "\n"))
 			}
 		}
 	}

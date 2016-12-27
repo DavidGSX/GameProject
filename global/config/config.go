@@ -42,9 +42,9 @@ type GlobalConfig struct {
 }
 
 var config *GlobalConfig
-var l sync.Mutex
+var configLock sync.Mutex
 
-func LoadConfig(filename string) error {
+func LoadConfig(filename string) bool {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println("LoadConfig >>>>>>", err)
@@ -53,84 +53,82 @@ func LoadConfig(filename string) error {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Panic("Read Global Config Error:", err, " filename:", filename)
-		return err
 	}
 	cfg := new(GlobalConfig)
 	err = json.Unmarshal(content, cfg)
 	if err != nil {
-		log.Panic("Unmarshal Global Config Error:", err)
-		return err
+		log.Panic("Unmarshal Config Error:", err)
 	}
 	config = cfg
-	return nil
+	return true
 }
 
 func GetConfig() *GlobalConfig {
-	l.Lock()
-	defer l.Unlock()
+	configLock.Lock()
+	defer configLock.Unlock()
 	if config == nil {
 		LoadConfig("./config/global.conf")
 	}
 	return config
 }
 
-func ReloadConfig() error {
-	l.Lock()
-	defer l.Unlock()
+func ReloadConfig() bool {
+	configLock.Lock()
+	defer configLock.Unlock()
 	return LoadConfig("./config/global.conf")
 }
 
-func (h *HttpConfig) Show() {
-	if h == nil {
+func (this *HttpConfig) Show() {
+	if this == nil {
 		return
 	}
-	log.Println("JMXIP:", h.JMXIP)
-	log.Println("JMXPort:", h.JMXPort)
-	log.Println("CallbackIP:", h.CallbackIP)
-	log.Println("CallbackPort:", h.CallbackPort)
-	log.Println("AuthorizeIP:", h.AuthorizeIP)
-	log.Println("AuthorizePort:", h.AuthorizePort)
+	log.Println("JMXIP:", this.JMXIP)
+	log.Println("JMXPort:", this.JMXPort)
+	log.Println("CallbackIP:", this.CallbackIP)
+	log.Println("CallbackPort:", this.CallbackPort)
+	log.Println("AuthorizeIP:", this.AuthorizeIP)
+	log.Println("AuthorizePort:", this.AuthorizePort)
 	log.Println()
 }
 
-func (p *PlatConfig) Show(prefix string) {
-	if p == nil {
+func (this *PlatConfig) Show(prefix string) {
+	if this == nil {
 		return
 	}
-	log.Println(prefix, "PlatID:", p.PlatID)
-	log.Println(prefix, "ClassName:", p.ClassName)
-	log.Println(prefix, "Author:", p.Author)
-	log.Println(prefix, "CallbackUrl:", p.CallbackUrl)
-	log.Println(prefix, "LoginUrl:", p.LoginUrl)
-	log.Println(prefix, "AppID:", p.AppID)
-	log.Println(prefix, "AppKey:", p.AppKey)
-	log.Println(prefix, "AppSecret:", p.AppSecret)
-	log.Println(prefix, "ConnTimeOut:", p.ConnTimeOut)
-	log.Println(prefix, "ReadTimeOut:", p.ReadTimeOut)
+	log.Println(prefix, "PlatID:", this.PlatID)
+	log.Println(prefix, "ClassName:", this.ClassName)
+	log.Println(prefix, "Author:", this.Author)
+	log.Println(prefix, "CallbackUrl:", this.CallbackUrl)
+	log.Println(prefix, "LoginUrl:", this.LoginUrl)
+	log.Println(prefix, "AppID:", this.AppID)
+	log.Println(prefix, "AppKey:", this.AppKey)
+	log.Println(prefix, "AppSecret:", this.AppSecret)
+	log.Println(prefix, "ConnTimeOut:", this.ConnTimeOut)
+	log.Println(prefix, "ReadTimeOut:", this.ReadTimeOut)
 	log.Println(prefix)
 }
 
-func (p *PlatSet) Show(prefix string) {
-	if p == nil {
+func (this *PlatSet) Show(prefix string) {
+	if this == nil {
 		return
 	}
-	log.Println(prefix, "SetID:", p.SetID)
-	for _, v := range p.PlatIDs {
+	log.Println(prefix, "SetID:", this.SetID)
+	for _, v := range this.PlatIDs {
 		log.Println(prefix, "	PlatIDs:", v)
 	}
-	log.Println(prefix, "DefaultPlat:", p.DefaultPlat)
+	log.Println(prefix, "DefaultPlat:", this.DefaultPlat)
 	log.Println(prefix)
 }
 
-func (g *GlobalConfig) Show() {
-	if g == nil {
+func (this *GlobalConfig) Show() {
+	if this == nil {
 		return
 	}
-	g.HttpConfig.Show()
-	for _, v := range g.PlatConfigs {
+	this.HttpConfig.Show()
+	for _, v := range this.PlatConfigs {
 		v.Show("	")
 	}
-	for _, v := range g.PlatSetInfo {
+	for _, v := range this.PlatSetInfo {
 		v.Show("	")
 	}
 }

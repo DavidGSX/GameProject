@@ -2,6 +2,7 @@ package plat
 
 import (
 	"gameproject/global/config"
+	"net/url"
 )
 
 type Plat struct {
@@ -19,5 +20,5 @@ type IClass interface {
 	Init(*config.PlatConfig)
 	Clone() IClass
 	Authorize(string, string)
-	Callback(string)
+	Callback(url.Values) string
 }

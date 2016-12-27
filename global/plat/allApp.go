@@ -3,6 +3,7 @@ package plat
 import (
 	"gameproject/global/config"
 	"log"
+	"net/url"
 )
 
 /*
@@ -28,6 +29,12 @@ func (this *AllApp) Authorize(uid, token string) {
 
 }
 
-func (this *AllApp) Callback(msg string) {
+func (this *AllApp) Callback(param url.Values) string {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("AllApp.Callback -> ", err)
+		}
+	}()
 
+	return "AllApp Callback"
 }
