@@ -43,3 +43,11 @@ message SRoleList {
 	int64 preLoginRoleId = 2;
 	bool preRoleInBattle = 3; // true战斗托管中，false不在游戏中
 }
+
+message CAddMoney {
+	int32 num = 1;
+}
+
+message SAddMoney {
+	int32 total = 1;
+}

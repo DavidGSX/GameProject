@@ -34,6 +34,10 @@ func (o *Octets) Pos() int {
 	return o.pos
 }
 
+func (o *Octets) Reset() {
+	*o = Octets{}
+}
+
 func (o *Octets) MarshalByte(x byte) {
 	o.buf = append(o.buf, x)
 }

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"gameproject/common"
 	"gameproject/server/protocol"
 	"log"
 	"net"
+	"strconv"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -18,7 +20,7 @@ func main() {
 			log.Println("Server Error -> ", err)
 		}
 	}()
-
+	common.GetDBPool()
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -39,6 +41,7 @@ func handleLinker(conn net.Conn) {
 	log.Println("handleLinker connected", conn.RemoteAddr().String())
 
 	buffer := make([]byte, 0)
+	total := int32(0)
 	for {
 		reader := make([]byte, 1024)
 		n, err := conn.Read(reader)
@@ -46,26 +49,47 @@ func handleLinker(conn net.Conn) {
 			log.Panic("Read Error:", err)
 		}
 		buffer = append(buffer, reader[:n]...)
-		log.Println(n, reader)
+		//log.Println(len(buffer), buffer)
 
-		login := &protocol.CUserLogin{}
-		err = proto.Unmarshal(buffer, login)
-		if err != nil {
-			log.Panic("unmarshal login error:", err)
+		for len(buffer) >= 4 {
+			oct := common.NewOctets(buffer)
+			size := oct.UncompactUint32()
+			if oct.Remain() < int(size) {
+				break
+			}
+
+			data := oct.UnmarshalBytes()
+			addmoney := &protocol.CAddMoney{}
+			err = proto.Unmarshal(data, addmoney)
+			if err != nil {
+				log.Panic("unmarshal login error:", err)
+			}
+
+			total += addmoney.GetNum()
+			log.Println(total)
+
+			go modifydb(1001, int(addmoney.GetNum()))
+
+			buffer = buffer[oct.Pos():]
 		}
-		log.Println("UserId:", login.UserId)
-		log.Println("Token:", login.Token)
-		log.Println("Zoneid:", login.Zoneid)
-		log.Println("Platform:", login.Platform)
-
-		loginRes := new(protocol.SUserLogin)
-		loginRes.LoginRes = protocol.SUserLogin_SUCCESS
-
-		loginResData, err := proto.Marshal(loginRes)
-		if err != nil {
-			log.Panic("marshal login result error:", err)
-		}
-
-		conn.Write(loginResData)
 	}
+}
+
+func modifydb(roleid, num int) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("defer->>>>>>", err)
+		}
+	}()
+
+	v := common.GetKV(strconv.Itoa(roleid))
+	if v == "" {
+		v = "0"
+	}
+	t, err := strconv.Atoi(v)
+	if err != nil {
+		log.Panic("strconv.Atoi error:", err)
+	}
+	t += num
+	common.SetKV(strconv.Itoa(roleid), strconv.Itoa(t))
 }

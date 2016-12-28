@@ -70,7 +70,7 @@ func handleConnection(conn net.Conn) {
 			oct := common.NewOctets(buffer)
 			size := oct.UnmarshalUint32()
 			//log.Println("size:", size)
-			if len(buffer) < int(size+4) {
+			if len(buffer) < int(size+oct.Pos()) {
 				break
 			}
 

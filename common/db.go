@@ -39,3 +39,17 @@ func SetKV(k, v string) {
 
 	c.Set(k, v)
 }
+
+func GetKV(k string) string {
+	c, err := GetDBPool().NewClient()
+	if err != nil {
+		log.Panic(err)
+	}
+	defer c.Close()
+
+	v, err := c.Get(k)
+	if err != nil {
+		log.Panic(err)
+	}
+	return v.String()
+}
