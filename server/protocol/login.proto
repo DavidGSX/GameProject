@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package protocol;
+
+message CUserLogin {
+	string userId = 1;
+	string token = 2;
+	int32 zoneid = 3;
+	enum PlatformType {
+		UNKNOW = 0;
+		IOS = 1;
+		ANDROID = 2;
+		YYB = 3;
+		YHLM = 4;
+	}
+	PlatformType platform = 4;
+}
+
+message SUserLogin {
+	enum LoginResType {
+		UNKNOW_ERR = 0;
+		SUCCESS = 1;
+		PASSWD_ERR = 2;
+		TIME_EXCEED = 3;
+	}
+	LoginResType loginRes = 1;
+}
+
+message CRoleList {
+	int32 selectRoleId = 1;
+}
+
+message SRoleList {
+	message RoleInfo {
+		int64 roleId = 1;
+		string roleName = 2;
+		int32 level = 3;
+		int32 school = 4;
+		map<int32, int32> components = 5;
+		bool showFashion = 6;
+	}
+	repeated RoleInfo roles = 1;
+	int64 preLoginRoleId = 2;
+	bool preRoleInBattle = 3; // true战斗托管中，false不在游戏中
+}
