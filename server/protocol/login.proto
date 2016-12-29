@@ -45,7 +45,8 @@ message SRoleList {
 }
 
 message CAddMoney {
-	int32 num = 1;
+	int64 roleId = 1;
+	int32 num = 2;
 }
 
 message SAddMoney {

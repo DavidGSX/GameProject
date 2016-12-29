@@ -2,6 +2,7 @@ package main
 
 import (
 	"gameproject/common"
+	"gameproject/server/manager"
 	"gameproject/server/protocol"
 	"log"
 	"net"
@@ -11,7 +12,7 @@ import (
 )
 
 func main() {
-	l, err := net.Listen("tcp", "127.0.0.1:29000")
+	l, err := net.Listen("tcp", "0.0.0.0:29000")
 	if err != nil {
 		log.Fatal("Server Listen Error:", err)
 	}
@@ -66,23 +67,24 @@ func handleLinker(conn net.Conn) {
 			}
 
 			total += addmoney.GetNum()
-			log.Println(total)
-
-			go modifydb(1001, int(addmoney.GetNum()))
+			Modifydb(int(addmoney.GetRoleId()), "money", int(addmoney.GetNum()))
 
 			buffer = buffer[oct.Pos():]
 		}
 	}
 }
 
-func modifydb(roleid, num int) {
+func Modifydb(roleid int, table string, param int) {
+	k := table + strconv.Itoa(roleid)
+	manager.GetLockMgr().Lock(k)
 	defer func() {
+		manager.GetLockMgr().Unlock(k)
 		if err := recover(); err != nil {
 			log.Println("defer->>>>>>", err)
 		}
 	}()
 
-	v := common.GetKV(strconv.Itoa(roleid))
+	v := common.GetKV(k)
 	if v == "" {
 		v = "0"
 	}
@@ -90,6 +92,6 @@ func modifydb(roleid, num int) {
 	if err != nil {
 		log.Panic("strconv.Atoi error:", err)
 	}
-	t += num
-	common.SetKV(strconv.Itoa(roleid), strconv.Itoa(t))
+	t += param
+	common.SetKV(k, strconv.Itoa(t))
 }
