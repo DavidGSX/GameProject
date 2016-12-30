@@ -8,18 +8,18 @@ import (
 )
 
 var pool *gossdb.Connectors
-var l sync.Mutex
+var dbPoolLock sync.Mutex
 
 func GetDBPool() *gossdb.Connectors {
-	l.Lock()
-	defer l.Unlock()
+	dbPoolLock.Lock()
+	defer dbPoolLock.Unlock()
 	if pool == nil {
 		var err error
 		pool, err = gossdb.NewPool(&gossdb.Config{
 			Host:             "127.0.0.1",
 			Port:             8888,
-			MinPoolSize:      100,
-			MaxPoolSize:      200,
+			MinPoolSize:      10,
+			MaxPoolSize:      100,
 			AcquireIncrement: 10,
 		})
 		if err != nil {

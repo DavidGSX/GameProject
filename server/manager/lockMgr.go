@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"gameproject/common"
 	"log"
 	"sync"
 )
@@ -24,7 +25,7 @@ func GetLockMgr() *LockMgr {
 	return lockMgr
 }
 
-func (this *LockMgr) GetLock(name string) *sync.Mutex {
+func (this *LockMgr) getLock(name string) *sync.Mutex {
 	this.mapLock.Lock()
 	defer this.mapLock.Unlock()
 
@@ -40,21 +41,18 @@ func (this *LockMgr) GetLock(name string) *sync.Mutex {
 	}
 }
 
-func (this *LockMgr) Lock(name string) {
-	this.GetLock(name).Lock()
+func (this *LockMgr) Lock(names ...string) {
+	names = common.SortAndRemoveEmptyDuplicates(names)
+	for _, v := range names {
+		this.getLock(v).Lock()
+	}
+	//log.Println("lock ", names)
 }
 
-func (this *LockMgr) Unlock(name string) {
-	this.mapLock.Lock()
-	defer this.mapLock.Unlock()
-
-	if name == "" {
-		log.Panic("LockMgr.Unlock name is nil")
+func (this *LockMgr) Unlock(names ...string) {
+	names = common.SortAndRemoveEmptyDuplicates(names)
+	for _, v := range names {
+		this.getLock(v).Unlock()
 	}
-	dbLock, ok := this.dbLockMap[name]
-	if ok {
-		dbLock.Unlock()
-	} else {
-		log.Panic("LockMgr.Unlock not find name:", name)
-	}
+	//log.Print("unlock", names)
 }

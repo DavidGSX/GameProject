@@ -22,6 +22,7 @@ func main() {
 		}
 	}()
 	common.GetDBPool()
+
 	for {
 		conn, err := l.Accept()
 		if err != nil {
