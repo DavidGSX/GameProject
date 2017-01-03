@@ -1,6 +1,27 @@
 package main
 
 import (
+	"gameproject/server/config"
+	"gameproject/server/manager"
+	"sync"
+)
+
+var wg sync.WaitGroup
+
+func main() {
+	cfg := config.GetConfig()
+	cfg.Show()
+
+	go manager.LinkMgrInit(cfg)
+	//go manager.GlobalMgrInit(cfg)
+	go manager.JMXInit(cfg, &wg)
+
+	wg.Add(1)
+	wg.Wait()
+}
+
+/*
+import (
 	"gameproject/common"
 	"gameproject/server/manager"
 	"gameproject/server/protocol"
@@ -96,3 +117,5 @@ func Modifydb(roleid int, table string, param int) {
 	t += param
 	common.SetKV(k, strconv.Itoa(t))
 }
+
+*/
