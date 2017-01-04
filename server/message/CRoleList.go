@@ -25,5 +25,5 @@ func (this *CRoleList) Unmarshal(data []byte) error {
 }
 
 func (this *CRoleList) Process() {
+	new(CRoleListProcess).Process(this)
 }
-

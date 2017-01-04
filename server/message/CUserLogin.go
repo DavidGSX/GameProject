@@ -25,5 +25,5 @@ func (this *CUserLogin) Unmarshal(data []byte) error {
 }
 
 func (this *CUserLogin) Process() {
+	new(CUserLoginProcess).Process(this)
 }
-

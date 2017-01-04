@@ -17,7 +17,7 @@ type PlatMgr struct {
 	configMap   map[int]config.PlatConfig
 	authorMap   map[string]plat.IClass
 	callbackMap map[string]plat.IClass
-	platSetMap  map[int]config.PlatSet
+	platSetMap  map[uint32]config.PlatSet
 }
 
 func GetPlatMgr() *PlatMgr {
@@ -29,7 +29,7 @@ func GetPlatMgr() *PlatMgr {
 		platMgr.configMap = make(map[int]config.PlatConfig)
 		platMgr.authorMap = make(map[string]plat.IClass)
 		platMgr.callbackMap = make(map[string]plat.IClass)
-		platMgr.platSetMap = make(map[int]config.PlatSet)
+		platMgr.platSetMap = make(map[uint32]config.PlatSet)
 	}
 	return platMgr
 }
@@ -129,14 +129,14 @@ func (this *PlatMgr) LoadPlatSet(cfg *config.GlobalConfig) {
 		log.Panic("PlatMgr.LoadPlatSet cfg is nil")
 	}
 
-	tmpPlatSet := make(map[int]config.PlatSet)
+	tmpPlatSet := make(map[uint32]config.PlatSet)
 	for _, v := range cfg.PlatSetInfo {
 		id := v.SetID
-		_, ok := tmpPlatSet[id]
+		_, ok := tmpPlatSet[uint32(id)]
 		if ok {
 			log.Panic("PlatMgr.LoadPlatSet set id duplicate, id:", id)
 		}
-		tmpPlatSet[id] = v
+		tmpPlatSet[uint32(id)] = v
 		v.Show("")
 	}
 
@@ -156,4 +156,29 @@ func (this *PlatMgr) ProcessCallback(path string, param url.Values) string {
 	}
 
 	return class.Callback(param)
+}
+
+func (this *PlatMgr) ProcessAuthor(plats uint32, userId, token string) {
+	platSet, ok := this.platSetMap[plats]
+	if ok == false {
+		log.Println("ProcessAuthor wrong plats:", plats)
+		return
+	}
+
+	strs := strings.Split(userId, "$")
+	if len(strs) != 2 {
+		log.Println("ProcessAuthor wrong userId:", userId)
+		return
+	}
+
+	class, ok := this.authorMap[strs[1]]
+	if ok == false {
+		log.Println("ProcessAuthor wrong user plat:", strs[1])
+		return
+	}
+
+	// todo
+	_ = platSet
+	_ = class
+	log.Println("to do")
 }

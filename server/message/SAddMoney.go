@@ -25,5 +25,5 @@ func (this *SAddMoney) Unmarshal(data []byte) error {
 }
 
 func (this *SAddMoney) Process() {
+	new(SAddMoneyProcess).Process(this)
 }
-

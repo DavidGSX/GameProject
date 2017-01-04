@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
 	"sort"
 	"strconv"
 )
@@ -72,12 +73,9 @@ func (this *MsgMgr) Gen() {
 	content = append(content, []byte("	MsgInfos = make(map[int]MsgInfo)\n")...)
 	for _, k := range types {
 		v := this.Type2Name[k]
-		content = append(content, []byte("	MsgInfos[")...)
-		content = append(content, []byte(strconv.Itoa(k))...)
-		content = append(content, []byte("] = new(")...)
-		content = append(content, []byte(v)...)
-		content = append(content, []byte(")\n")...)
+		content = append(content, []byte("	MsgInfos["+strconv.Itoa(k)+"] = new("+v+")\n")...)
 		GenMsgInfo(v)
+		GenMsgProcess(v)
 	}
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
@@ -105,13 +103,9 @@ func GenMsgInfo(name string) {
 	content = append(content, []byte("	\"github.com/golang/protobuf/proto\"\n")...)
 	content = append(content, []byte(")\n")...)
 	content = append(content, []byte("\n")...)
-	content = append(content, []byte("type ")...)
-	content = append(content, []byte(name)...)
-	content = append(content, []byte(" struct {\n")...)
+	content = append(content, []byte("type "+name+" struct {\n")...)
 	content = append(content, []byte("	RoleId uint64\n")...)
-	content = append(content, []byte("	Proto  protocol.")...)
-	content = append(content, []byte(name)...)
-	content = append(content, []byte("\n")...)
+	content = append(content, []byte("	Proto  protocol."+name+"\n")...)
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("func (this *"+name+") Clone() MsgInfo {\n")...)
@@ -128,11 +122,41 @@ func GenMsgInfo(name string) {
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("func (this *"+name+") Process() {\n")...)
+	content = append(content, []byte("	new("+name+"Process).Process(this)\n")...)
 	content = append(content, []byte("}\n")...)
-	content = append(content, []byte("\n")...)
 
 	filename := "../message/" + name + ".go"
 	err := ioutil.WriteFile(filename, content, 0666)
+	if err != nil {
+		log.Panic("Write MsgMgr.go Error:", err)
+	}
+}
+
+func GenMsgProcess(name string) {
+	// 文件存在，可能有写具体的处理逻辑，生成代码会覆盖，所以直接返回
+	filename := "../message/" + name + "Process.go"
+	_, err := os.Stat(filename)
+	if err == nil || os.IsNotExist(err) == false {
+		return
+	}
+
+	content := make([]byte, 0)
+	content = append(content, []byte("package message\n")...)
+	content = append(content, []byte("\n")...)
+	content = append(content, []byte("import (\n")...)
+	content = append(content, []byte("	\"log\"\n")...)
+	content = append(content, []byte(")\n")...)
+	content = append(content, []byte("\n")...)
+	content = append(content, []byte("type "+name+"Process struct {\n")...)
+	content = append(content, []byte("	msg *"+name+"\n")...)
+	content = append(content, []byte("}\n")...)
+	content = append(content, []byte("\n")...)
+	content = append(content, []byte("func (this *"+name+"Process) Process(msg *"+name+") {\n")...)
+	content = append(content, []byte("	this.msg = msg\n")...)
+	content = append(content, []byte("	log.Println(\"to do "+name+"Process\")\n")...)
+	content = append(content, []byte("}\n")...)
+
+	err = ioutil.WriteFile(filename, content, 0666)
 	if err != nil {
 		log.Panic("Write MsgMgr.go Error:", err)
 	}

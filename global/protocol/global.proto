@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package protocol;
+
+// msgtype = 1
+message SGServerStart {
+	uint32 zoneId = 1;
+	uint32 plat = 2;
+}
+
+// msgtype = 2
+message SGUserAuth {
+	string userId = 1;
+	string token = 2;
+}

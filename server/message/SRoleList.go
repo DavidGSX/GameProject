@@ -25,5 +25,5 @@ func (this *SRoleList) Unmarshal(data []byte) error {
 }
 
 func (this *SRoleList) Process() {
+	new(SRoleListProcess).Process(this)
 }
-

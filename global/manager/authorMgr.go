@@ -5,7 +5,58 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"sync"
 )
+
+var authorMgr *AuthorMgr
+var authorMgrLock sync.RWMutex
+
+type AuthorMgr struct {
+	zoneId2Links map[uint32]*Server //ZoneId到连接信息的映射
+}
+
+func GetAuthorMgr() *AuthorMgr {
+	authorMgrLock.Lock()
+	defer authorMgrLock.Unlock()
+
+	if authorMgr == nil {
+		authorMgr = new(AuthorMgr)
+		authorMgr.zoneId2Links = make(map[uint32]*Server)
+	}
+	return authorMgr
+}
+
+func (this *AuthorMgr) AddLink(zoneId uint32, l *Server) {
+	authorMgrLock.Lock()
+	defer authorMgrLock.Unlock()
+
+	v, ok := this.zoneId2Links[zoneId]
+	if ok {
+		v.Close()
+		delete(this.zoneId2Links, zoneId)
+	}
+
+	this.zoneId2Links[zoneId] = l
+}
+
+func (this *AuthorMgr) DelLink(zoneId uint32) {
+	authorMgrLock.Lock()
+	defer authorMgrLock.Unlock()
+
+	delete(this.zoneId2Links, zoneId)
+}
+
+func (this *AuthorMgr) GetLink(zoneId uint32) *Server {
+	authorMgrLock.RLock()
+	defer authorMgrLock.RUnlock()
+
+	v, ok := this.zoneId2Links[zoneId]
+	if ok {
+		return v
+	} else {
+		return nil
+	}
+}
 
 func InitAuthor(cfg *config.GlobalConfig) {
 	ip := cfg.HttpConfig.AuthorizeIP
@@ -26,29 +77,6 @@ func InitAuthor(cfg *config.GlobalConfig) {
 		if err != nil {
 			log.Panic("Author Accept Error:", err)
 		}
-		go handleAuthor(conn)
-	}
-}
-
-func handleAuthor(conn net.Conn) {
-	defer func() {
-		log.Println("handleAuthor disconnected", conn.RemoteAddr().String())
-		conn.Close()
-		if err := recover(); err != nil {
-			log.Println("handleAuthor -> ", err)
-		}
-	}()
-	log.Println("handleAuthor connected", conn.RemoteAddr().String())
-
-	buffer := make([]byte, 0)
-	for {
-		reader := make([]byte, 1024)
-		n, err := conn.Read(reader)
-		if err != nil {
-			log.Panic("Read Error:", err)
-		}
-		buffer = append(buffer, reader[:n]...)
-		//log.Println(n, reader)
-
+		go NewLink(conn).Process()
 	}
 }

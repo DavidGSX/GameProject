@@ -30,9 +30,8 @@ type PlatConfig struct {
 }
 
 type PlatSet struct {
-	SetID       int   // 平台集合的名字，Server连接Global时会携带此信息 （一般为IOS，Android，硬核联盟，应用宝）
-	PlatIDs     []int // 集合具体能处理的渠道
-	DefaultPlat int   // 在集合中没有找到的渠道类型，用此渠道来处理
+	SetID   int   // 平台集合的名字，Server连接Global时会携带此信息 （一般为IOS，Android，硬核联盟，应用宝）
+	PlatIDs []int // 集合具体能处理的渠道
 }
 
 type GlobalConfig struct {
@@ -116,7 +115,6 @@ func (this *PlatSet) Show(prefix string) {
 	for _, v := range this.PlatIDs {
 		log.Println(prefix, "	PlatIDs:", v)
 	}
-	log.Println(prefix, "DefaultPlat:", this.DefaultPlat)
 	log.Println(prefix)
 }
 
