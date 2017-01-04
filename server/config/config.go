@@ -7,6 +7,11 @@ import (
 	"sync"
 )
 
+type BaseConfig struct {
+	ZoneId   int // 服务器的唯一ID
+	Platform int // 连接Global的平台类型
+}
+
 type JMXConfig struct {
 	JMXIP   string // JMX监听的IP
 	JMXPort int    // JMX监听的端口
@@ -23,6 +28,7 @@ type GlobalConfig struct {
 }
 
 type ServerConfig struct {
+	BaseConfig   BaseConfig   // 基础信息配置
 	JMXConfig    JMXConfig    // JMX的配置
 	LinkConfig   LinkConfig   // Link的配置
 	GlobalConfig GlobalConfig // Global的配置
@@ -65,6 +71,19 @@ func ReloadConfig() bool {
 	return LoadConfig("./config/server.conf")
 }
 
+func (this *ServerConfig) GetZoneId() int {
+	return this.BaseConfig.ZoneId
+}
+
+func (this *BaseConfig) Show() {
+	if this == nil {
+		return
+	}
+	log.Println("ZoneId:", this.ZoneId)
+	log.Println("Platform:", this.Platform)
+	log.Println()
+}
+
 func (this *JMXConfig) Show() {
 	if this == nil {
 		return
@@ -96,6 +115,7 @@ func (this *ServerConfig) Show() {
 	if this == nil {
 		return
 	}
+	this.BaseConfig.Show()
 	this.JMXConfig.Show()
 	this.LinkConfig.Show()
 	this.GlobalConfig.Show()

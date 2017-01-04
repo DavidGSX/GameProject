@@ -2,13 +2,11 @@ package manager
 
 import (
 	"gameproject/common"
-	"gameproject/server/protocol"
+	"gameproject/server/message"
 	"log"
 	"net"
 	"sync"
 	"time"
-
-	"github.com/golang/protobuf/proto"
 )
 
 type Link struct {
@@ -61,49 +59,54 @@ func (this *Link) Process() {
 		this.OnSend()
 		// 每帧20ms的处理时间
 		if time.Since(begin) < 20*time.Millisecond {
-			<-time.After(20*time.Millisecond - time.Since(begin))
+			time.Sleep(20*time.Millisecond - time.Since(begin))
 		}
 	}
 }
 
 func (this *Link) OnReceive() {
-	reader := make([]byte, 1024)
+	reader := make([]byte, 16384)
 	n, err := this.conn.Read(reader)
 	if err != nil {
+		// 超时不处理，继续执行
 		if nerr, ok := err.(*net.OpError); !ok || !nerr.Timeout() {
 			log.Panic("Read Error:", err, this.conn.RemoteAddr().String())
 		}
 	}
-	this.recvBuf = append(this.recvBuf, reader[:n]...)
-
-	// 每帧最多处理2条协议
-	for i := 0; i < 2; i++ {
-		if len(this.recvBuf) < 4 {
+	if n > 0 {
+		this.recvBuf = append(this.recvBuf, reader[:n]...)
+	}
+	// 每帧最多处理3条协议
+	for i := 0; i < 3; i++ {
+		if len(this.recvBuf) < 8 {
 			break
 		}
 
 		oct := common.NewOctets(this.recvBuf)
-		size := oct.UncompactUint32()
+		size := oct.UnmarshalUint32()
+		msgType := oct.UnmarshalUint32()
 		if oct.Remain() < int(size) {
 			break
 		}
+		data := oct.UnmarshalBytes4Len(int(size))
 
-		data := oct.UnmarshalBytes()
-		addmoney := &protocol.CAddMoney{}
-		err = proto.Unmarshal(data, addmoney)
+		msg := message.GetMsg(int(msgType))
+		if msg == nil {
+			log.Panic("Unknow Protocol Type:", msgType)
+		}
+		msg = msg.Clone()
+		err = msg.Unmarshal(data)
 		if err != nil {
-			log.Panic("unmarshal CAddMoney error:", err)
+			log.Panic("Unmarshal Protocol Error:", err, " Type:", msgType)
 		}
-
-		if addmoney.GetNum()%1000 == 0 {
-			log.Println("RoleId:", addmoney.GetRoleId(), " Num:", addmoney.GetNum())
-		}
+		msg.SetRoleId(this.roleId)
+		msg.Process()
 
 		this.recvBuf = this.recvBuf[oct.Pos():]
 	}
 
-	// 缓冲区大于1M，断开客户端连接
-	if len(this.recvBuf) > 1e6 {
+	// 缓冲区大于100K，断开客户端连接
+	if len(this.recvBuf) > 1e5 {
 		log.Panic("Receive Buffer too Big!")
 	}
 }
@@ -122,7 +125,6 @@ func (this *Link) OnSend() {
 			log.Panic("Write Error:", err, this.conn.RemoteAddr().String())
 		}
 	}
-	//log.Println(n, this.sendbuf[:n])
 	this.sendBuf = this.sendBuf[n:]
 }
 

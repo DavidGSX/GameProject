@@ -165,6 +165,22 @@ func (o *Octets) UnmarshalBytes() []byte {
 	return v
 }
 
+func (o *Octets) MarshalBytes4Len(x []byte) {
+	o.MarshalUint32(uint32(len(x)))
+	o.buf = append(o.buf, x...)
+}
+
+// size（即byte的长度）直接通过UnmarshalUint32()获取
+func (o *Octets) UnmarshalBytes4Len(size int) []byte {
+	if o.pos+size > len(o.buf) {
+		log.Panic("UnmarshalBytes4Len Error pos:", o.pos, "size:", size, "buf len:", len(o.buf))
+	}
+	v := make([]byte, size)
+	copy(v, o.buf[o.pos:])
+	o.pos += size
+	return v
+}
+
 func (o *Octets) MarshalUint16s(x []uint16) {
 	o.CompactUint32(uint32(len(x) * 2))
 	for i := 0; i < len(x); i++ {
@@ -239,4 +255,33 @@ func (o *Octets) UncompactUint32() uint32 {
 		log.Panic("UncompactUint32 Error v:", byte(v))
 	}
 	return 0
+}
+
+/*
+ *  采用ProtoBuf的编码规则，每个Byte最高位是标志位，如果该位是1，表示Byte后面还有其他Byte，
+ *  如果该位是0，表示Byte为最后一个字节。
+ *  Byte的低7位用来存储数值
+ *  采用Little-Endian(小端)字节序（即高位在字节后面）
+ *  样例：0x80 的编码为 0x80, 0x01
+ *       0xffffffff 的编码为 0xff, 0xff, 0xff, 0xff, 0x0f
+ */
+
+func (o *Octets) EncodeUint32(x uint32) {
+	for x > 127 {
+		o.MarshalByte(byte(0x80 | uint8(x&0x7F)))
+		x >>= 7
+	}
+	o.MarshalByte(byte(x))
+}
+
+func (o *Octets) DecodeUint32() (x uint32) {
+	shift := uint(0)
+	v := o.UnmarshalByte()
+	for v > 127 {
+		x |= uint32(v&0x7f) << shift
+		shift += 7
+		v = o.UnmarshalByte()
+	}
+	x |= uint32(v) << shift
+	return x
 }

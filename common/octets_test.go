@@ -273,6 +273,29 @@ func TestUnmarshalBytes(t *testing.T) {
 	}
 }
 
+func TestMarshalBytes4Len(t *testing.T) {
+	p := NewOctets([]byte(""))
+	p.MarshalBytes4Len([]byte{0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0})
+	if bytes.Equal(p.GetBuf(), []byte{0x00, 0x00, 0x00, 0x08, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0}) == false {
+		t.Errorf("failed!")
+	}
+	if bytes.Equal(p.GetBuf(), []byte("123456789abcdef0")) {
+		t.Errorf("failed!")
+	}
+}
+
+func TestUnmarshalBytes4Len(t *testing.T) {
+	p := NewOctets([]byte{0x00, 0x00, 0x00, 0x08, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0})
+	size := p.UnmarshalUint32()
+	b := p.UnmarshalBytes4Len(int(size))
+	if bytes.Equal(b, []byte{0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0}) == false {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != int(size)+4 {
+		t.Errorf("failed!")
+	}
+}
+
 func TestMarshalUint16s(t *testing.T) {
 	p := NewOctets([]byte(""))
 	p.MarshalUint16s([]uint16{0x1234, 0x5678, 0x9abc, 0xdef0})
@@ -392,6 +415,95 @@ func TestUncompactUint32(t *testing.T) {
 		t.Errorf("failed!")
 	}
 	if p.UncompactUint32() != 0xffffffff {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != 10 {
+		t.Errorf("failed!")
+	}
+}
+
+func TestEncodeUint32(t *testing.T) {
+	p := NewOctets([]byte(""))
+	p.EncodeUint32(0x01)
+	p.EncodeUint32(0x7f)
+	p.EncodeUint32(0x80)
+	p.EncodeUint32(0x3fff)
+	p.EncodeUint32(0x4000)
+	p.EncodeUint32(0x1fffff)
+	p.EncodeUint32(0x200000)
+	p.EncodeUint32(0xfffffff)
+	p.EncodeUint32(0x10000000)
+	b := p.GetBuf()
+	if bytes.Equal(b, []byte{0x01, 0x7f, 0x80, 0x01, 0xff, 0x7f, 0x80, 0x80, 0x01, 0xff, 0xff, 0x7f, 0x80, 0x80, 0x80, 0x01, 0xff, 0xff, 0xff, 0x7f, 0x80, 0x80, 0x80, 0x80, 0x01}) == false {
+		t.Errorf("failed!")
+	}
+}
+
+func TestDecodeUint32(t *testing.T) {
+	p := NewOctets([]byte{0x01, 0x7f})
+	if p.DecodeUint32() != 0x01 {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != 1 {
+		t.Errorf("failed!")
+	}
+	if p.DecodeUint32() != 0x7f {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != 2 {
+		t.Errorf("failed!")
+	}
+
+	p = NewOctets([]byte{0x80, 0x01, 0xff, 0x7f})
+	if p.DecodeUint32() != 0x80 {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != 2 {
+		t.Errorf("failed!")
+	}
+	if p.DecodeUint32() != 0x3fff {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != 4 {
+		t.Errorf("failed!")
+	}
+
+	p = NewOctets([]byte{0x80, 0x80, 0x01, 0xff, 0xff, 0x7f})
+	if p.DecodeUint32() != 0x4000 {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != 3 {
+		t.Errorf("failed!")
+	}
+	if p.DecodeUint32() != 0x1fffff {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != 6 {
+		t.Errorf("failed!")
+	}
+
+	p = NewOctets([]byte{0x80, 0x80, 0x80, 0x01, 0xff, 0xff, 0xff, 0x7f})
+	if p.DecodeUint32() != 0x200000 {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != 4 {
+		t.Errorf("failed!")
+	}
+	if p.DecodeUint32() != 0xfffffff {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != 8 {
+		t.Errorf("failed!")
+	}
+
+	p = NewOctets([]byte{0x80, 0x80, 0x80, 0x80, 0x01, 0xff, 0xff, 0xff, 0xff, 0x0f})
+	if p.DecodeUint32() != 0x10000000 {
+		t.Errorf("failed!")
+	}
+	if p.Pos() != 5 {
+		t.Errorf("failed!")
+	}
+	if p.DecodeUint32() != 0xffffffff {
 		t.Errorf("failed!")
 	}
 	if p.Pos() != 10 {

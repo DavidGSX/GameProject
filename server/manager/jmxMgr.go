@@ -60,8 +60,15 @@ func handleJMX(conn net.Conn) {
 			case "stop":
 				jmxWG.Done()
 			case "reload":
-				log.Println("to do --- reload config")
+				if config.ReloadConfig() == true {
+					log.Println(cmd + " success!")
+					conn.Write([]byte(cmd + " success!\n"))
+				} else {
+					log.Println(cmd + " failed!")
+					conn.Write([]byte(cmd + " failed!\n"))
+				}
 			case "q":
+			case "quit":
 				log.Panic("JMX Quit")
 			default:
 				conn.Write([]byte("Unknow Command " + cmd + "\n"))

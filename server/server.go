@@ -3,6 +3,7 @@ package main
 import (
 	"gameproject/server/config"
 	"gameproject/server/manager"
+	"gameproject/server/message"
 	"sync"
 )
 
@@ -11,6 +12,8 @@ var wg sync.WaitGroup
 func main() {
 	cfg := config.GetConfig()
 	cfg.Show()
+
+	message.Init()
 
 	go manager.LinkMgrInit(cfg)
 	//go manager.GlobalMgrInit(cfg)

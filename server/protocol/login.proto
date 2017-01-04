@@ -5,7 +5,7 @@ package protocol;
 message CUserLogin {
 	string userId = 1;
 	string token = 2;
-	int32 zoneid = 3;
+	int32 zoneId = 3;
 	enum PlatformType {
 		UNKNOW = 0;
 		IOS = 1;
