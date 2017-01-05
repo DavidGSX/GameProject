@@ -33,9 +33,8 @@ func (this *LinkMgr) AddLinkByUserId(userId string, l *Link) {
 	defer linkMgrLock.Unlock()
 
 	v, ok := this.userId2Links[userId]
-	if ok {
-		v.Close()
-		delete(this.userId2Links, userId)
+	if ok && v != l {
+		go v.Close()
 	}
 
 	this.userId2Links[userId] = l
@@ -47,8 +46,7 @@ func (this *LinkMgr) AddLinkByRoleId(roleId uint64, l *Link) {
 
 	v, ok := this.roleId2Links[roleId]
 	if ok {
-		v.Close()
-		delete(this.roleId2Links, roleId)
+		go v.Close()
 	}
 
 	this.roleId2Links[roleId] = l

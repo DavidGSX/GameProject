@@ -40,6 +40,11 @@ func (this *Link) SetUserId(u string) {
 		log.Println("SetUserId old:", this.userId, " new:", u)
 	}
 	this.userId = u
+	GetLinkMgr().AddLinkByUserId(u, this)
+}
+
+func (this *Link) SetAuthored() {
+	this.authored = true
 }
 
 func (this *Link) Process() {
@@ -84,7 +89,7 @@ func (this *Link) OnReceive() {
 	}
 	if n > 0 {
 		this.recvBuf = append(this.recvBuf, reader[:n]...)
-		log.Println(n, reader[:n])
+		log.Println("Link Receive Buffer", this.recvBuf)
 	}
 	// 每帧最多处理3条协议
 	for i := 0; i < 3; i++ {
@@ -99,6 +104,10 @@ func (this *Link) OnReceive() {
 			break
 		}
 		data := oct.UnmarshalBytesOnly(int(size))
+
+		if msgType != 1001 && this.authored == false {
+			log.Panic("Link is not authored, Message Type:", msgType)
+		}
 
 		msg := message.GetMsg(int(msgType))
 		if msg == nil {
@@ -141,11 +150,9 @@ func (this *Link) OnSend() {
 }
 
 func (this *Link) Send(x []byte) {
-	log.Println("1 ", x)
-
 	this.sendLock.Lock()
 	defer this.sendLock.Unlock()
 
-	log.Println("2 ", x)
 	this.sendBuf = append(this.sendBuf, x...)
+	log.Println("Link Send Buffer", this.sendBuf)
 }

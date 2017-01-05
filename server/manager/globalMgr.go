@@ -1,15 +1,15 @@
 package manager
 
 import (
+	"gameproject/common"
+	globalpro "gameproject/global/protocol"
 	"gameproject/server/config"
+	serverpro "gameproject/server/protocol"
 	"log"
 	"net"
 	"strconv"
 	"sync"
 	"time"
-
-	"gameproject/common"
-	"gameproject/global/protocol"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -71,7 +71,7 @@ func (this *GlobalConn) OnRegisterGlobal(cfg *config.ServerConfig) {
 		}
 	}()
 
-	send := &protocol.SGServerStart{}
+	send := &globalpro.SGServerStart{}
 	send.ZoneId = cfg.GetZoneId()
 	send.Plat = cfg.GetPlatform()
 	data, err := proto.Marshal(send)
@@ -157,10 +157,9 @@ func (this *GlobalConn) OnReceive() {
 	}
 }
 
-func (this *GlobalConn) OnAuthResult(data []byte) {
-
-	res := &protocol.GSAuthResult{}
-	err := proto.Unmarshal(data, res)
+func (this *GlobalConn) OnAuthResult(b []byte) {
+	res := &globalpro.GSAuthResult{}
+	err := proto.Unmarshal(b, res)
 	if err != nil {
 		log.Println("unmarshal GSAuthResult error:", err)
 		return
@@ -169,8 +168,31 @@ func (this *GlobalConn) OnAuthResult(data []byte) {
 	userId := res.UserId
 	plat := res.Plat
 	result := res.Result
-
 	log.Println("OnAuthResult userId:", userId, " plat:", plat, " result:", result)
+	link := GetLinkMgr().GetLinkByUserId(userId)
+
+	loginRes := &serverpro.SUserLogin{}
+	if result == "ok" {
+		loginRes.LoginRes = serverpro.SUserLogin_SUCCESS
+		if link != nil {
+			link.SetAuthored()
+		}
+	} else {
+		loginRes.LoginRes = serverpro.SUserLogin_PASSWD_ERR
+	}
+	data, err := proto.Marshal(loginRes)
+	if err != nil {
+		log.Panic("marshal CUserLogin error:", err)
+	}
+	oct := &common.Octets{}
+	oct.MarshalUint32(uint32(len(data)))
+	oct.MarshalUint32(1002)
+	oct.MarshalBytesOnly(data)
+	if link != nil {
+		link.Send(oct.GetBuf())
+	} else {
+		log.Println("OnAuthResult userId:", userId, " link is nil")
+	}
 }
 
 func (this *GlobalConn) OnSend() {
@@ -195,4 +217,8 @@ func (this *GlobalConn) Send(x []byte) {
 	defer globalConnLock.Unlock()
 
 	this.sendBuf = append(this.sendBuf, x...)
+}
+
+func (this *GlobalConn) SetUserId(u string) {
+	// just use to adjust interface ISend
 }

@@ -71,6 +71,7 @@ func (this *MsgMgr) Gen() {
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("type ISend interface {\n")...)
 	content = append(content, []byte("	Send(x []byte)\n")...)
+	content = append(content, []byte("	SetUserId(u string)\n")...)
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("var MsgInfos map[int]MsgInfo\n")...)
@@ -91,7 +92,6 @@ func (this *MsgMgr) Gen() {
 	content = append(content, []byte("	}\n")...)
 	content = append(content, []byte("	return MsgInfos[t]\n")...)
 	content = append(content, []byte("}\n")...)
-	content = append(content, []byte("\n")...)
 
 	err := ioutil.WriteFile("../message/msgMgr.go", content, 0666)
 	if err != nil {

@@ -77,7 +77,7 @@ func (this *Server) OnReceive() {
 	}
 	if n > 0 {
 		this.recvBuf = append(this.recvBuf, reader[:n]...)
-		log.Println(n, reader[:n])
+		log.Println("Server Receive Buffer", this.recvBuf)
 	}
 	// 每帧最多处理100条协议
 	for i := 0; i < 100; i++ {
@@ -181,4 +181,5 @@ func (this *Server) Send(x []byte) {
 	defer this.sendLock.Unlock()
 
 	this.sendBuf = append(this.sendBuf, x...)
+	log.Println("Server Send Buffer", this.sendBuf)
 }

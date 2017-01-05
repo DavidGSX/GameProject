@@ -23,6 +23,7 @@ func (this *CUserLoginProcess) Process(msg *CUserLogin) {
 	token := msg.Proto.Token
 
 	log.Println("UserId:", userId, " Token:", token)
+	msg.Link.SetUserId(userId)
 
 	send := &protocol.SGUserAuth{}
 	send.UserId = userId
@@ -32,7 +33,6 @@ func (this *CUserLoginProcess) Process(msg *CUserLogin) {
 		log.Println("Marshal SGUserAuth error:", err)
 		return
 	}
-
 	oct := &common.Octets{}
 	oct.MarshalUint32(uint32(len(data)))
 	oct.MarshalUint32(2)

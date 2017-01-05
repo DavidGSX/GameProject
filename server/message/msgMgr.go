@@ -11,6 +11,7 @@ type MsgInfo interface {
 
 type ISend interface {
 	Send(x []byte)
+	SetUserId(u string)
 }
 
 var MsgInfos map[int]MsgInfo
@@ -31,4 +32,3 @@ func GetMsg(t int) MsgInfo {
 	}
 	return MsgInfos[t]
 }
-
