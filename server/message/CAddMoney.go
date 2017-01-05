@@ -7,6 +7,8 @@ import (
 )
 
 type CAddMoney struct {
+	Link   ISend
+	Global ISend
 	RoleId uint64
 	Proto  protocol.CAddMoney
 }
@@ -17,6 +19,14 @@ func (this *CAddMoney) Clone() MsgInfo {
 
 func (this *CAddMoney) SetRoleId(r uint64) {
 	this.RoleId = r
+}
+
+func (this *CAddMoney) SetLink(s ISend) {
+	this.Link = s
+}
+
+func (this *CAddMoney) SetGlobal(s ISend) {
+	this.Global = s
 }
 
 func (this *CAddMoney) Unmarshal(data []byte) error {

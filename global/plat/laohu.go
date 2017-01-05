@@ -60,8 +60,8 @@ func (this *Laohu) Clone() IClass {
 	return new(Laohu)
 }
 
-func (this *Laohu) Authorize(uid, token string) {
-
+func (this *Laohu) Authorize(uid, token string) string {
+	return "failed"
 }
 
 func (this *Laohu) Callback(param url.Values) string {

@@ -60,8 +60,8 @@ func (this *OneSdk) Clone() IClass {
 	return new(OneSdk)
 }
 
-func (this *OneSdk) Authorize(uid, token string) {
-
+func (this *OneSdk) Authorize(uid, token string) string {
+	return "failed"
 }
 
 func (this *OneSdk) Callback(param url.Values) string {

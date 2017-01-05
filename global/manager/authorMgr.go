@@ -12,7 +12,7 @@ var authorMgr *AuthorMgr
 var authorMgrLock sync.RWMutex
 
 type AuthorMgr struct {
-	zoneId2Links map[uint32]*Server //ZoneId到连接信息的映射
+	zoneId2Server map[uint32]*Server //ZoneId到GS连接信息的映射
 }
 
 func GetAuthorMgr() *AuthorMgr {
@@ -21,36 +21,36 @@ func GetAuthorMgr() *AuthorMgr {
 
 	if authorMgr == nil {
 		authorMgr = new(AuthorMgr)
-		authorMgr.zoneId2Links = make(map[uint32]*Server)
+		authorMgr.zoneId2Server = make(map[uint32]*Server)
 	}
 	return authorMgr
 }
 
-func (this *AuthorMgr) AddLink(zoneId uint32, l *Server) {
+func (this *AuthorMgr) AddServer(zoneId uint32, l *Server) {
 	authorMgrLock.Lock()
 	defer authorMgrLock.Unlock()
 
-	v, ok := this.zoneId2Links[zoneId]
+	v, ok := this.zoneId2Server[zoneId]
 	if ok {
 		v.Close()
-		delete(this.zoneId2Links, zoneId)
+		delete(this.zoneId2Server, zoneId)
 	}
 
-	this.zoneId2Links[zoneId] = l
+	this.zoneId2Server[zoneId] = l
 }
 
-func (this *AuthorMgr) DelLink(zoneId uint32) {
+func (this *AuthorMgr) DelServer(zoneId uint32) {
 	authorMgrLock.Lock()
 	defer authorMgrLock.Unlock()
 
-	delete(this.zoneId2Links, zoneId)
+	delete(this.zoneId2Server, zoneId)
 }
 
-func (this *AuthorMgr) GetLink(zoneId uint32) *Server {
+func (this *AuthorMgr) GetServer(zoneId uint32) *Server {
 	authorMgrLock.RLock()
 	defer authorMgrLock.RUnlock()
 
-	v, ok := this.zoneId2Links[zoneId]
+	v, ok := this.zoneId2Server[zoneId]
 	if ok {
 		return v
 	} else {
@@ -77,6 +77,6 @@ func InitAuthor(cfg *config.GlobalConfig) {
 		if err != nil {
 			log.Panic("Author Accept Error:", err)
 		}
-		go NewLink(conn).Process()
+		go NewServer(conn).Process()
 	}
 }

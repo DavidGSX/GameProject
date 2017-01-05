@@ -19,6 +19,17 @@ type Plat struct {
 type IClass interface {
 	Init(*config.PlatConfig)
 	Clone() IClass
-	Authorize(string, string)
+	Authorize(string, string) string
 	Callback(url.Values) string
+}
+
+type IPlatMgr interface {
+	AddClass(string, IClass)
+}
+
+// 所有已实现的渠道，都需要在此处注册
+func InitClass(platMgr IPlatMgr) {
+	platMgr.AddClass("AllApp", new(AllApp))
+	platMgr.AddClass("OneSdk", new(OneSdk))
+	platMgr.AddClass("Laohu", new(Laohu))
 }

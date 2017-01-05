@@ -5,6 +5,7 @@ import (
 	"gameproject/server/manager"
 	"gameproject/server/message"
 	"sync"
+	"time"
 )
 
 var wg sync.WaitGroup
@@ -12,11 +13,11 @@ var wg sync.WaitGroup
 func main() {
 	cfg := config.GetConfig()
 	cfg.Show()
-
 	message.Init()
+	<-time.After(5e9) // 5秒初始化时间
 
 	go manager.LinkMgrInit(cfg)
-	//go manager.GlobalMgrInit(cfg)
+	go manager.GlobalMgrInit(cfg)
 	go manager.JMXInit(cfg, &wg)
 
 	wg.Add(1)

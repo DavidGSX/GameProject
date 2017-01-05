@@ -25,8 +25,8 @@ func (this *AllApp) Clone() IClass {
 	return new(AllApp)
 }
 
-func (this *AllApp) Authorize(uid, token string) {
-
+func (this *AllApp) Authorize(uid, token string) string {
+	return "ok"
 }
 
 func (this *AllApp) Callback(param url.Values) string {

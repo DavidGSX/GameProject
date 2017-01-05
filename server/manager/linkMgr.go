@@ -12,6 +12,7 @@ var linkMgr *LinkMgr
 var linkMgrLock sync.RWMutex
 
 type LinkMgr struct {
+	userId2Links map[string]*Link //账号Id到连接信息的映射
 	roleId2Links map[uint64]*Link //角色id到连接信息的映射
 }
 
@@ -21,12 +22,26 @@ func GetLinkMgr() *LinkMgr {
 
 	if linkMgr == nil {
 		linkMgr = new(LinkMgr)
+		linkMgr.userId2Links = make(map[string]*Link)
 		linkMgr.roleId2Links = make(map[uint64]*Link)
 	}
 	return linkMgr
 }
 
-func (this *LinkMgr) AddLink(roleId uint64, l *Link) {
+func (this *LinkMgr) AddLinkByUserId(userId string, l *Link) {
+	linkMgrLock.Lock()
+	defer linkMgrLock.Unlock()
+
+	v, ok := this.userId2Links[userId]
+	if ok {
+		v.Close()
+		delete(this.userId2Links, userId)
+	}
+
+	this.userId2Links[userId] = l
+}
+
+func (this *LinkMgr) AddLinkByRoleId(roleId uint64, l *Link) {
 	linkMgrLock.Lock()
 	defer linkMgrLock.Unlock()
 
@@ -38,15 +53,33 @@ func (this *LinkMgr) AddLink(roleId uint64, l *Link) {
 
 	this.roleId2Links[roleId] = l
 }
+func (this *LinkMgr) DelLinkByUserId(userId string) {
+	linkMgrLock.Lock()
+	defer linkMgrLock.Unlock()
 
-func (this *LinkMgr) DelLink(roleId uint64) {
+	delete(this.userId2Links, userId)
+}
+
+func (this *LinkMgr) DelLinkByRoleId(roleId uint64) {
 	linkMgrLock.Lock()
 	defer linkMgrLock.Unlock()
 
 	delete(this.roleId2Links, roleId)
 }
 
-func (this *LinkMgr) GetLink(roleId uint64) *Link {
+func (this *LinkMgr) GetLinkByUserId(userId string) *Link {
+	linkMgrLock.RLock()
+	defer linkMgrLock.RUnlock()
+
+	v, ok := this.userId2Links[userId]
+	if ok {
+		return v
+	} else {
+		return nil
+	}
+}
+
+func (this *LinkMgr) GetLinkByRoleId(roleId uint64) *Link {
 	linkMgrLock.RLock()
 	defer linkMgrLock.RUnlock()
 

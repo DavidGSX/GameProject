@@ -1,12 +1,16 @@
 package manager
 
 import (
+	"gameproject/common"
 	"gameproject/global/config"
 	"gameproject/global/plat"
+	"gameproject/global/protocol"
 	"log"
 	"net/url"
 	"strings"
 	"sync"
+
+	"github.com/golang/protobuf/proto"
 )
 
 var platMgr *PlatMgr
@@ -14,10 +18,9 @@ var platMgrLock sync.RWMutex
 
 type PlatMgr struct {
 	classMap    map[string]plat.IClass
-	configMap   map[int]config.PlatConfig
 	authorMap   map[string]plat.IClass
 	callbackMap map[string]plat.IClass
-	platSetMap  map[uint32]config.PlatSet
+	platSetMap  map[uint32][]string
 }
 
 func GetPlatMgr() *PlatMgr {
@@ -26,10 +29,9 @@ func GetPlatMgr() *PlatMgr {
 	if platMgr == nil {
 		platMgr = new(PlatMgr)
 		platMgr.classMap = make(map[string]plat.IClass)
-		platMgr.configMap = make(map[int]config.PlatConfig)
 		platMgr.authorMap = make(map[string]plat.IClass)
 		platMgr.callbackMap = make(map[string]plat.IClass)
-		platMgr.platSetMap = make(map[uint32]config.PlatSet)
+		platMgr.platSetMap = make(map[uint32][]string)
 	}
 	return platMgr
 }
@@ -41,11 +43,8 @@ func (this *PlatMgr) Init(cfg *config.GlobalConfig) {
 	}
 }
 
-// 所有已实现的渠道，都需要在此处注册
 func (this *PlatMgr) InitClass() {
-	this.AddClass("AllApp", new(plat.AllApp))
-	this.AddClass("OneSdk", new(plat.OneSdk))
-	this.AddClass("Laohu", new(plat.Laohu))
+	plat.InitClass(this)
 }
 
 func (this *PlatMgr) AddClass(name string, class plat.IClass) {
@@ -76,22 +75,16 @@ func (this *PlatMgr) LoadCfg(cfg *config.GlobalConfig) error {
 		}
 	}()
 
-	tmpCfgMap := make(map[int]config.PlatConfig)
-	for _, v := range cfg.PlatConfigs {
-		id := v.PlatID
-		_, ok := tmpCfgMap[id]
-		if ok {
-			log.Panic("PlatMgr.LoadCfg plat id duplicate, id:", id)
-		}
-		tmpCfgMap[id] = v
-		v.Show("")
-	}
-
 	tmpAuthorMap := make(map[string]plat.IClass)
 	tmpCallbackMap := make(map[string]plat.IClass)
 	for _, v := range cfg.PlatConfigs {
+		c, ok := this.classMap[v.ClassName]
+		if ok == false {
+			log.Panic("PlatMgr.LoadCfg class not exist:", v.ClassName)
+		}
+
 		author := v.Author
-		_, ok := tmpAuthorMap[author]
+		_, ok = tmpAuthorMap[author]
 		if ok {
 			log.Panic("PlatMgr.LoadCfg plat author duplicate, author:", author)
 		}
@@ -100,11 +93,6 @@ func (this *PlatMgr) LoadCfg(cfg *config.GlobalConfig) error {
 		_, ok = tmpCallbackMap[callback]
 		if ok && callback != "" {
 			log.Panic("PlatMgr.LoadCfg plat callback duplicate, callback:", callback)
-		}
-
-		c, ok := this.classMap[v.ClassName]
-		if ok == false {
-			log.Panic("PlatMgr.LoadCfg class not exist:", v.ClassName)
 		}
 
 		class := c.Clone()
@@ -117,30 +105,63 @@ func (this *PlatMgr) LoadCfg(cfg *config.GlobalConfig) error {
 
 	this.LoadPlatSet(cfg)
 
-	this.configMap = tmpCfgMap
 	this.authorMap = tmpAuthorMap
 	this.callbackMap = tmpCallbackMap
 	return nil
 }
 
-// 加载所有的PlatSetInfo到Map中，并初始化处理的class，用SetID作为唯一标记
+// 加载所有的PlatSetInfo到Map中，用SetID作为唯一标记
 func (this *PlatMgr) LoadPlatSet(cfg *config.GlobalConfig) {
 	if cfg == nil {
 		log.Panic("PlatMgr.LoadPlatSet cfg is nil")
 	}
 
-	tmpPlatSet := make(map[uint32]config.PlatSet)
+	tmpCfgMap := make(map[int]config.PlatConfig)
+	for _, v := range cfg.PlatConfigs {
+		id := v.PlatID
+		_, ok := tmpCfgMap[id]
+		if ok {
+			log.Panic("PlatMgr.LoadCfg plat id duplicate, id:", id)
+		}
+		tmpCfgMap[id] = v
+	}
+
+	tmpPlatSet := make(map[uint32][]string)
 	for _, v := range cfg.PlatSetInfo {
 		id := v.SetID
 		_, ok := tmpPlatSet[uint32(id)]
 		if ok {
 			log.Panic("PlatMgr.LoadPlatSet set id duplicate, id:", id)
 		}
-		tmpPlatSet[uint32(id)] = v
-		v.Show("")
+
+		plats := make([]string, 0)
+		for _, p := range v.PlatIDs {
+			cfg, ok := tmpCfgMap[p]
+			if ok == false {
+				log.Panic("PlatMgr.LoadCfg PlatSet plat not in configure, plat:", p)
+			}
+			plats = append(plats, cfg.Author)
+		}
+		tmpPlatSet[uint32(id)] = plats
 	}
 
 	this.platSetMap = tmpPlatSet
+}
+
+func (this *PlatMgr) GetPlatsBySetId(id uint32) (plats map[string]bool) {
+	platMgrLock.Lock()
+	defer platMgrLock.Unlock()
+
+	plats = make(map[string]bool)
+	v, ok := this.platSetMap[id]
+	if ok == false {
+		return plats
+	}
+
+	for _, p := range v {
+		plats[p] = true
+	}
+	return plats
 }
 
 func (this *PlatMgr) ProcessCallback(path string, param url.Values) string {
@@ -158,27 +179,27 @@ func (this *PlatMgr) ProcessCallback(path string, param url.Values) string {
 	return class.Callback(param)
 }
 
-func (this *PlatMgr) ProcessAuthor(plats uint32, userId, token string) {
-	platSet, ok := this.platSetMap[plats]
+func (this *PlatMgr) ProcessAuthor(gs *Server, plat, userId, token string) {
+	class, ok := this.authorMap[plat]
 	if ok == false {
-		log.Println("ProcessAuthor wrong plats:", plats)
+		log.Println("PlatMgr.ProcessAuthor plat not exist, plat:", plat)
 		return
 	}
 
-	strs := strings.Split(userId, "$")
-	if len(strs) != 2 {
-		log.Println("ProcessAuthor wrong userId:", userId)
+	res := class.Authorize(userId, token)
+	send := &protocol.GSAuthResult{}
+	send.UserId = userId + "$" + plat
+	send.Plat = plat
+	send.Result = res
+	data, err := proto.Marshal(send)
+	if err != nil {
+		log.Println("Marshal GSAuthResult error:", err)
 		return
 	}
 
-	class, ok := this.authorMap[strs[1]]
-	if ok == false {
-		log.Println("ProcessAuthor wrong user plat:", strs[1])
-		return
-	}
-
-	// todo
-	_ = platSet
-	_ = class
-	log.Println("to do")
+	oct := &common.Octets{}
+	oct.MarshalUint32(uint32(len(data)))
+	oct.MarshalUint32(3)
+	oct.MarshalBytesOnly(data)
+	gs.Send(oct.GetBuf())
 }

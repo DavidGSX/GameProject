@@ -15,6 +15,7 @@ type Link struct {
 	sendBuf  []byte
 	sendLock sync.Mutex
 	lastTime time.Time
+	userId   string
 	roleId   uint64
 	authored bool
 }
@@ -30,7 +31,15 @@ func NewLink(c net.Conn) *Link {
 
 func (this *Link) Close() {
 	this.conn.Close()
-	GetLinkMgr().DelLink(this.roleId)
+	GetLinkMgr().DelLinkByUserId(this.userId)
+	GetLinkMgr().DelLinkByRoleId(this.roleId)
+}
+
+func (this *Link) SetUserId(u string) {
+	if this.userId != "" && this.userId != u {
+		log.Println("SetUserId old:", this.userId, " new:", u)
+	}
+	this.userId = u
 }
 
 func (this *Link) Process() {
@@ -75,6 +84,7 @@ func (this *Link) OnReceive() {
 	}
 	if n > 0 {
 		this.recvBuf = append(this.recvBuf, reader[:n]...)
+		log.Println(n, reader[:n])
 	}
 	// 每帧最多处理3条协议
 	for i := 0; i < 3; i++ {
@@ -88,7 +98,7 @@ func (this *Link) OnReceive() {
 		if oct.Remain() < int(size) {
 			break
 		}
-		data := oct.UnmarshalBytes4Len(int(size))
+		data := oct.UnmarshalBytesOnly(int(size))
 
 		msg := message.GetMsg(int(msgType))
 		if msg == nil {
@@ -100,6 +110,8 @@ func (this *Link) OnReceive() {
 			log.Panic("Unmarshal Protocol Error:", err, " Type:", msgType)
 		}
 		msg.SetRoleId(this.roleId)
+		msg.SetLink(this)
+		msg.SetGlobal(GetGlobalConn())
 		msg.Process()
 
 		this.recvBuf = this.recvBuf[oct.Pos():]
@@ -129,8 +141,11 @@ func (this *Link) OnSend() {
 }
 
 func (this *Link) Send(x []byte) {
+	log.Println("1 ", x)
+
 	this.sendLock.Lock()
 	defer this.sendLock.Unlock()
 
+	log.Println("2 ", x)
 	this.sendBuf = append(this.sendBuf, x...)
 }

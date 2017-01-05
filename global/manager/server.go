@@ -5,6 +5,7 @@ import (
 	"gameproject/global/protocol"
 	"log"
 	"net"
+	"strings"
 	"sync"
 	"time"
 
@@ -18,10 +19,10 @@ type Server struct {
 	sendLock sync.Mutex
 	lastTime time.Time
 	zoneId   uint32
-	plat     uint32
+	plats    map[string]bool
 }
 
-func NewLink(c net.Conn) *Server {
+func NewServer(c net.Conn) *Server {
 	l := new(Server)
 	l.conn = c
 	l.recvBuf = make([]byte, 0)
@@ -32,7 +33,7 @@ func NewLink(c net.Conn) *Server {
 
 func (this *Server) Close() {
 	this.conn.Close()
-	GetAuthorMgr().DelLink(this.zoneId)
+	GetAuthorMgr().DelServer(this.zoneId)
 }
 
 func (this *Server) Process() {
@@ -76,6 +77,7 @@ func (this *Server) OnReceive() {
 	}
 	if n > 0 {
 		this.recvBuf = append(this.recvBuf, reader[:n]...)
+		log.Println(n, reader[:n])
 	}
 	// 每帧最多处理100条协议
 	for i := 0; i < 100; i++ {
@@ -89,7 +91,7 @@ func (this *Server) OnReceive() {
 		if oct.Remain() < int(size) {
 			break
 		}
-		data := oct.UnmarshalBytes4Len(int(size))
+		data := oct.UnmarshalBytesOnly(int(size))
 
 		switch msgType {
 		case 1:
@@ -116,27 +118,45 @@ func (this *Server) OnServerStart(data []byte) {
 	serverStart := &protocol.SGServerStart{}
 	err := proto.Unmarshal(data, serverStart)
 	if err != nil {
-		log.Panic("unmarshal SGServerStart error:", err)
+		log.Println("unmarshal SGServerStart error:", err)
+		return
 	}
 
 	this.zoneId = serverStart.ZoneId
-	this.plat = serverStart.Plat
-	log.Println("Server Connected zoneId:", this.zoneId, " plat:", this.plat, " ", this.conn.RemoteAddr().String())
+	this.plats = GetPlatMgr().GetPlatsBySetId(serverStart.Plat)
+	keys := make([]string, 0)
+	for k := range this.plats {
+		keys = append(keys, k)
+	}
+	log.Println("Server Connected zoneId:", this.zoneId, " plat:", serverStart.Plat, " plats:", keys, this.conn.RemoteAddr().String())
 }
 
 func (this *Server) OnUserAuth(data []byte) {
-	if this.zoneId == 0 || this.plat == 0 {
-		log.Println("Server not Send zoneId:", this.zoneId, " plat:", this.plat, " ", this.conn.RemoteAddr().String())
+	if this.zoneId == 0 || len(this.plats) == 0 {
+		log.Println("Server not Send zoneId:", this.zoneId, " plat:", this.plats, " ", this.conn.RemoteAddr().String())
 		return
 	}
 
 	author := &protocol.SGUserAuth{}
 	err := proto.Unmarshal(data, author)
 	if err != nil {
-		log.Panic("unmarshal SGServerStart error:", err)
+		log.Println("unmarshal SGServerStart error:", err)
+		return
 	}
 
-	GetPlatMgr().ProcessAuthor(this.plat, author.UserId, author.Token)
+	strs := strings.Split(author.UserId, "$")
+	if len(strs) != 2 {
+		log.Println("ProcessAuthor wrong userId:", author.UserId)
+		return
+	}
+
+	_, ok := this.plats[strs[1]]
+	if ok == false {
+		log.Println("ProcessAuthor wrong user plat:", strs[1])
+		return
+	}
+
+	GetPlatMgr().ProcessAuthor(this, strs[1], strs[0], author.Token)
 }
 
 func (this *Server) OnSend() {

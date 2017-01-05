@@ -165,13 +165,13 @@ func (o *Octets) UnmarshalBytes() []byte {
 	return v
 }
 
-func (o *Octets) MarshalBytes4Len(x []byte) {
-	o.MarshalUint32(uint32(len(x)))
+// len在外层通过MarshalUint32()封装
+func (o *Octets) MarshalBytesOnly(x []byte) {
 	o.buf = append(o.buf, x...)
 }
 
 // size（即byte的长度）直接通过UnmarshalUint32()获取
-func (o *Octets) UnmarshalBytes4Len(size int) []byte {
+func (o *Octets) UnmarshalBytesOnly(size int) []byte {
 	if o.pos+size > len(o.buf) {
 		log.Panic("UnmarshalBytes4Len Error pos:", o.pos, "size:", size, "buf len:", len(o.buf))
 	}

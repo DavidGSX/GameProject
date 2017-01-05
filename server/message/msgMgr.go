@@ -3,8 +3,14 @@ package message
 type MsgInfo interface {
 	Clone() MsgInfo
 	SetRoleId(r uint64)
+	SetLink(s ISend)
+	SetGlobal(s ISend)
 	Unmarshal(data []byte) error
 	Process()
+}
+
+type ISend interface {
+	Send(x []byte)
 }
 
 var MsgInfos map[int]MsgInfo

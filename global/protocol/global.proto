@@ -13,3 +13,10 @@ message SGUserAuth {
 	string userId = 1;
 	string token = 2;
 }
+
+// msgtype = 3
+message GSAuthResult {
+	string userId = 1;
+	string plat = 2;
+	string result = 3;
+}

@@ -7,6 +7,8 @@ import (
 )
 
 type SUserLogin struct {
+	Link   ISend
+	Global ISend
 	RoleId uint64
 	Proto  protocol.SUserLogin
 }
@@ -17,6 +19,14 @@ func (this *SUserLogin) Clone() MsgInfo {
 
 func (this *SUserLogin) SetRoleId(r uint64) {
 	this.RoleId = r
+}
+
+func (this *SUserLogin) SetLink(s ISend) {
+	this.Link = s
+}
+
+func (this *SUserLogin) SetGlobal(s ISend) {
+	this.Global = s
 }
 
 func (this *SUserLogin) Unmarshal(data []byte) error {

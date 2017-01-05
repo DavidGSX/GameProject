@@ -8,8 +8,8 @@ import (
 )
 
 type BaseConfig struct {
-	ZoneId   int // 服务器的唯一ID
-	Platform int // 连接Global的平台类型
+	ZoneId   uint32 // 服务器的唯一ID
+	Platform uint32 // 连接Global的平台类型
 }
 
 type JMXConfig struct {
@@ -71,8 +71,12 @@ func ReloadConfig() bool {
 	return LoadConfig("./config/server.conf")
 }
 
-func (this *ServerConfig) GetZoneId() int {
+func (this *ServerConfig) GetZoneId() uint32 {
 	return this.BaseConfig.ZoneId
+}
+
+func (this *ServerConfig) GetPlatform() uint32 {
+	return this.BaseConfig.Platform
 }
 
 func (this *BaseConfig) Show() {

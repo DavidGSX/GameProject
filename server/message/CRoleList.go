@@ -7,6 +7,8 @@ import (
 )
 
 type CRoleList struct {
+	Link   ISend
+	Global ISend
 	RoleId uint64
 	Proto  protocol.CRoleList
 }
@@ -17,6 +19,14 @@ func (this *CRoleList) Clone() MsgInfo {
 
 func (this *CRoleList) SetRoleId(r uint64) {
 	this.RoleId = r
+}
+
+func (this *CRoleList) SetLink(s ISend) {
+	this.Link = s
+}
+
+func (this *CRoleList) SetGlobal(s ISend) {
+	this.Global = s
 }
 
 func (this *CRoleList) Unmarshal(data []byte) error {
