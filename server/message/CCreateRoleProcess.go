@@ -2,7 +2,7 @@ package message
 
 import (
 	"gameproject/common"
-	"gameproject/server/db"
+	"gameproject/server/cache"
 	"gameproject/server/protocol"
 	"log"
 
@@ -17,7 +17,7 @@ func (this *CCreateRoleProcess) Process(msg *CCreateRole) {
 	this.msg = msg
 
 	k := "NAME" + msg.Proto.Name
-	v := db.GetKV(k)
+	v := cache.GetKV(k)
 
 	sendInfo := &protocol.SCreateRole{}
 	if v != "" {

@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	for c := 100; c < 160; c++ {
+	for c := 100; c < 200; c++ {
 		go Robot("star"+strconv.Itoa(c)+"$apps", strconv.Itoa(c))
 	}
 
