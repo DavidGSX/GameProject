@@ -273,9 +273,10 @@ func TestUnmarshalBytes(t *testing.T) {
 	}
 }
 
-func TestMarshalBytes4Len(t *testing.T) {
+func TestMarshalBytesOnly(t *testing.T) {
 	p := NewOctets([]byte(""))
-	p.MarshalBytes4Len([]byte{0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0})
+	p.MarshalUint32(8)
+	p.MarshalBytesOnly([]byte{0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0})
 	if bytes.Equal(p.GetBuf(), []byte{0x00, 0x00, 0x00, 0x08, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0}) == false {
 		t.Errorf("failed!")
 	}
@@ -284,14 +285,14 @@ func TestMarshalBytes4Len(t *testing.T) {
 	}
 }
 
-func TestUnmarshalBytes4Len(t *testing.T) {
+func TestUnmarshalBytesOnly(t *testing.T) {
 	p := NewOctets([]byte{0x00, 0x00, 0x00, 0x08, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0})
 	size := p.UnmarshalUint32()
-	b := p.UnmarshalBytes4Len(int(size))
+	b := p.UnmarshalBytesOnly(size)
 	if bytes.Equal(b, []byte{0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0}) == false {
 		t.Errorf("failed!")
 	}
-	if p.Pos() != int(size)+4 {
+	if p.Pos() != size+4 {
 		t.Errorf("failed!")
 	}
 }

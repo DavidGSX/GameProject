@@ -12,23 +12,32 @@ type BaseConfig struct {
 	Platform uint32 // 连接Global的平台类型
 }
 
+type DBConfig struct {
+	DBIP             string // 数据库的IP
+	DBPort           uint32 // 数据库的端口
+	MinPoolSize      uint32 // 连接池最少的连接数
+	MaxPoolSize      uint32 // 连接池最大的连接数
+	AcquireIncrement uint32 // 连接池每次增加的数量
+}
+
 type JMXConfig struct {
 	JMXIP   string // JMX监听的IP
-	JMXPort int    // JMX监听的端口
+	JMXPort uint32 // JMX监听的端口
 }
 
 type LinkConfig struct {
 	LinkIP   string // 监听玩家连接的IP
-	LinkPort int    // 监听玩家连接的端口
+	LinkPort uint32 // 监听玩家连接的端口
 }
 
 type GlobalConfig struct {
 	GlobalIP   string // 连接Global的IP
-	GlobalPort int    // 连接Global的端口
+	GlobalPort uint32 // 连接Global的端口
 }
 
 type ServerConfig struct {
 	BaseConfig   BaseConfig   // 基础信息配置
+	DBConfig     DBConfig     // 数据库配置
 	JMXConfig    JMXConfig    // JMX的配置
 	LinkConfig   LinkConfig   // Link的配置
 	GlobalConfig GlobalConfig // Global的配置
@@ -88,6 +97,18 @@ func (this *BaseConfig) Show() {
 	log.Println()
 }
 
+func (this *DBConfig) Show() {
+	if this == nil {
+		return
+	}
+	log.Println("DBIP:", this.DBIP)
+	log.Println("DBPort:", this.DBPort)
+	log.Println("MinPoolSize:", this.MinPoolSize)
+	log.Println("MaxPoolSize:", this.MaxPoolSize)
+	log.Println("AcquireIncrement:", this.AcquireIncrement)
+	log.Println()
+}
+
 func (this *JMXConfig) Show() {
 	if this == nil {
 		return
@@ -120,6 +141,7 @@ func (this *ServerConfig) Show() {
 		return
 	}
 	this.BaseConfig.Show()
+	this.DBConfig.Show()
 	this.JMXConfig.Show()
 	this.LinkConfig.Show()
 	this.GlobalConfig.Show()

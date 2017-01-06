@@ -1,7 +1,12 @@
 package message
 
 import (
+	"gameproject/common"
+	"gameproject/server/db"
+	"gameproject/server/protocol"
 	"log"
+
+	"github.com/golang/protobuf/proto"
 )
 
 type CRoleListProcess struct {
@@ -10,5 +15,22 @@ type CRoleListProcess struct {
 
 func (this *CRoleListProcess) Process(msg *CRoleList) {
 	this.msg = msg
-	log.Println("to do CRoleListProcess")
+
+	k := "USER" + msg.Link.GetUserId()
+	v := db.GetKV(k)
+
+	sendInfo := &protocol.SRoleList{}
+	if v != "" {
+		// Decode DB Data
+	}
+	sendInfo.PreLoginRoleId = 1
+	data, err := proto.Marshal(sendInfo)
+	if err != nil {
+		log.Panic("marshal error:", err)
+	}
+	oct := &common.Octets{}
+	oct.MarshalUint32(uint32(len(data)))
+	oct.MarshalUint32(1004)
+	oct.MarshalBytesOnly(data)
+	msg.Link.Send(oct.GetBuf())
 }

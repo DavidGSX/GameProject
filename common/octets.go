@@ -8,8 +8,8 @@ import (
 
 type Octets struct {
 	buf     []byte
-	pos     int
-	tranpos int
+	pos     uint32
+	tranpos uint32
 }
 
 func NewOctets(x []byte) *Octets {
@@ -26,11 +26,11 @@ func (o *Octets) GetBuf() []byte {
 	return o.buf
 }
 
-func (o *Octets) Remain() int {
-	return len(o.buf) - o.pos
+func (o *Octets) Remain() uint32 {
+	return uint32(len(o.buf)) - o.pos
 }
 
-func (o *Octets) Pos() int {
+func (o *Octets) Pos() uint32 {
 	return o.pos
 }
 
@@ -43,7 +43,7 @@ func (o *Octets) MarshalByte(x byte) {
 }
 
 func (o *Octets) UnmarshalByte() byte {
-	if o.pos+1 > len(o.buf) {
+	if o.pos+1 > uint32(len(o.buf)) {
 		log.Panic("UnmarshalByte Error pos:", o.pos, "buf len:", len(o.buf))
 	}
 	v := o.buf[o.pos]
@@ -60,7 +60,7 @@ func (o *Octets) MarshalBool(x bool) {
 }
 
 func (o *Octets) UnmarshalBool() bool {
-	if o.pos+1 > len(o.buf) {
+	if o.pos+1 > uint32(len(o.buf)) {
 		log.Panic("UnmarshalBool Error pos:", o.pos, "buf len:", len(o.buf))
 	}
 	v := o.buf[o.pos]
@@ -74,7 +74,7 @@ func (o *Octets) MarshalUint16(x uint16) {
 }
 
 func (o *Octets) UnmarshalUint16() uint16 {
-	if o.pos+2 > len(o.buf) {
+	if o.pos+2 > uint32(len(o.buf)) {
 		log.Panic("UnmarshalUint16 Error pos:", o.pos, "buf len:", len(o.buf))
 	}
 	v0 := uint16(o.buf[o.pos])
@@ -91,7 +91,7 @@ func (o *Octets) MarshalUint32(x uint32) {
 }
 
 func (o *Octets) UnmarshalUint32() uint32 {
-	if o.pos+4 > len(o.buf) {
+	if o.pos+4 > uint32(len(o.buf)) {
 		log.Panic("UnmarshalUint32 Error pos:", o.pos, "buf len:", len(o.buf))
 	}
 	v0 := uint32(o.buf[o.pos])
@@ -114,7 +114,7 @@ func (o *Octets) MarshalUint64(x uint64) {
 }
 
 func (o *Octets) UnmarshalUint64() uint64 {
-	if o.pos+8 > len(o.buf) {
+	if o.pos+8 > uint32(len(o.buf)) {
 		log.Panic("UnmarshalUint64 Error pos:", o.pos, "buf len:", len(o.buf))
 	}
 	v0 := uint64(o.buf[o.pos])
@@ -155,8 +155,8 @@ func (o *Octets) MarshalBytes(x []byte) {
 }
 
 func (o *Octets) UnmarshalBytes() []byte {
-	size := int(o.UncompactUint32())
-	if o.pos+size > len(o.buf) {
+	size := o.UncompactUint32()
+	if o.pos+size > uint32(len(o.buf)) {
 		log.Panic("UnmarshalBytes Error pos:", o.pos, "size:", size, "buf len:", len(o.buf))
 	}
 	v := make([]byte, size)
@@ -171,8 +171,8 @@ func (o *Octets) MarshalBytesOnly(x []byte) {
 }
 
 // size（即byte的长度）直接通过UnmarshalUint32()获取
-func (o *Octets) UnmarshalBytesOnly(size int) []byte {
-	if o.pos+size > len(o.buf) {
+func (o *Octets) UnmarshalBytesOnly(size uint32) []byte {
+	if o.pos+size > uint32(len(o.buf)) {
 		log.Panic("UnmarshalBytes4Len Error pos:", o.pos, "size:", size, "buf len:", len(o.buf))
 	}
 	v := make([]byte, size)
@@ -191,15 +191,15 @@ func (o *Octets) MarshalUint16s(x []uint16) {
 }
 
 func (o *Octets) UnmarshalUint16s() []uint16 {
-	size := int(o.UncompactUint32())
-	if o.pos+size > len(o.buf) {
+	size := o.UncompactUint32()
+	if o.pos+size > uint32(len(o.buf)) {
 		log.Panic("UnmarshalUint16s Error pos:", o.pos, "size:", size, "buf len:", len(o.buf))
 	}
 	if size%2 != 0 {
 		log.Panic("UnmarshalUint16s Error size:", size)
 	}
 	v := make([]uint16, size/2)
-	for i, j := o.pos, 0; j < size/2; i, j = i+2, j+1 {
+	for i, j := o.pos, uint32(0); j < size/2; i, j = i+2, j+1 {
 		low := uint16(o.buf[i])
 		high := uint16(o.buf[i+1])
 		v[j] = low | (high << 8)
@@ -236,7 +236,7 @@ func (o *Octets) CompactUint32(x uint32) {
 }
 
 func (o *Octets) UncompactUint32() uint32 {
-	if o.pos == len(o.buf) {
+	if o.pos == uint32(len(o.buf)) {
 		log.Panic("UncompactUint32 Error pos:", o.pos, "buf len:", len(o.buf))
 	}
 

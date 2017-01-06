@@ -12,6 +12,7 @@ type MsgInfo interface {
 type ISend interface {
 	Send(x []byte)
 	SetUserId(u string)
+	GetUserId() string
 }
 
 var MsgInfos map[int]MsgInfo
@@ -22,8 +23,10 @@ func Init() {
 	MsgInfos[1002] = new(SUserLogin)
 	MsgInfos[1003] = new(CRoleList)
 	MsgInfos[1004] = new(SRoleList)
-	MsgInfos[1005] = new(CAddMoney)
-	MsgInfos[1006] = new(SAddMoney)
+	MsgInfos[1005] = new(CCreateRole)
+	MsgInfos[1006] = new(SCreateRole)
+	MsgInfos[1007] = new(CAddMoney)
+	MsgInfos[1008] = new(SMoneyInfo)
 }
 
 func GetMsg(t int) MsgInfo {

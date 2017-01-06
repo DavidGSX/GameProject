@@ -43,7 +43,7 @@ func (l *Linker) Receive(x []byte) {
 			break
 		}
 
-		mark := oct.Pos() + int(size)
+		mark := oct.Pos() + size
 		l.recvbuf = l.recvbuf[mark:]
 
 		sid := oct.UnmarshalUint32()

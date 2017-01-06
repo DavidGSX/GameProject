@@ -5,7 +5,7 @@ package protocol;
 message CUserLogin {
 	string userId = 1;
 	string token = 2;
-	int32 zoneId = 3;
+	uint32 zoneId = 3;
 	enum PlatformType {
 		UNKNOW = 0;
 		IOS = 1;
@@ -27,28 +27,48 @@ message SUserLogin {
 }
 
 message CRoleList {
-	int32 selectRoleId = 1;
+	uint64 selectRoleId = 1;
 }
 
 message SRoleList {
 	message RoleInfo {
-		int64 roleId = 1;
+		uint64 roleId = 1;
 		string roleName = 2;
-		int32 level = 3;
-		int32 school = 4;
+		uint32 level = 3;
+		uint32 school = 4;
 		map<int32, int32> components = 5;
 		bool showFashion = 6;
 	}
 	repeated RoleInfo roles = 1;
-	int64 preLoginRoleId = 2;
-	bool preRoleInBattle = 3; // true战斗托管中，false不在游戏中
+	uint64 preLoginRoleId = 2;
+}
+
+message CCreateRole {
+	string name = 1;
+	uint32 school = 2;
+	uint32 sex = 4;
+}
+
+message SCreateRole {
+	enum ResultType {
+		UNKNOW_ERR = 0;
+		SUCCESS = 1;
+		NAME_INVALID = 2;
+		NAME_DUPLICATED = 3;
+		NAME_OVERLEN = 4;
+		NAME_SHORTLEN = 5;
+		OVER_COUNT = 6;
+	}
+	ResultType res = 1;
+	SRoleList.RoleInfo info = 2;
 }
 
 message CAddMoney {
-	int64 roleId = 1;
-	int32 num = 2;
+	uint64 roleId = 1;
+	uint32 num = 2;
 }
 
-message SAddMoney {
-	int32 total = 1;
+message SMoneyInfo {
+	uint64 roleId = 1;
+	uint32 total = 2;
 }

@@ -88,10 +88,10 @@ func (this *Server) OnReceive() {
 		oct := common.NewOctets(this.recvBuf)
 		size := oct.UnmarshalUint32()
 		msgType := oct.UnmarshalUint32()
-		if oct.Remain() < int(size) {
+		if oct.Remain() < size {
 			break
 		}
-		data := oct.UnmarshalBytesOnly(int(size))
+		data := oct.UnmarshalBytesOnly(size)
 
 		switch msgType {
 		case 1:

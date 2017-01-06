@@ -43,7 +43,7 @@ func ReConnectGlobal() {
 func GlobalMgrInit(cfg *config.ServerConfig) {
 	ip := cfg.GlobalConfig.GlobalIP
 	port := cfg.GlobalConfig.GlobalPort
-	conn, err := net.Dial("tcp", ip+":"+strconv.Itoa(port))
+	conn, err := net.Dial("tcp", ip+":"+strconv.Itoa(int(port)))
 	if err != nil {
 		log.Fatal("Connect Global Error:", err)
 	}
@@ -133,10 +133,10 @@ func (this *GlobalConn) OnReceive() {
 		oct := common.NewOctets(this.recvBuf)
 		size := oct.UnmarshalUint32()
 		msgType := oct.UnmarshalUint32()
-		if oct.Remain() < int(size) {
+		if oct.Remain() < size {
 			break
 		}
-		data := oct.UnmarshalBytesOnly(int(size))
+		data := oct.UnmarshalBytesOnly(size)
 
 		switch msgType {
 		case 3:
@@ -221,4 +221,9 @@ func (this *GlobalConn) Send(x []byte) {
 
 func (this *GlobalConn) SetUserId(u string) {
 	// just use to adjust interface ISend
+}
+
+func (this *GlobalConn) GetUserId() string {
+	// just use to adjust interface ISend
+	return ""
 }

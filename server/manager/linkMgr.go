@@ -92,7 +92,7 @@ func (this *LinkMgr) GetLinkByRoleId(roleId uint64) *Link {
 func LinkMgrInit(cfg *config.ServerConfig) {
 	ip := cfg.LinkConfig.LinkIP
 	port := cfg.LinkConfig.LinkPort
-	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(port))
+	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(int(port)))
 	if err != nil {
 		log.Fatal("Link Listen Error ", err)
 	}

@@ -72,6 +72,7 @@ func (this *MsgMgr) Gen() {
 	content = append(content, []byte("type ISend interface {\n")...)
 	content = append(content, []byte("	Send(x []byte)\n")...)
 	content = append(content, []byte("	SetUserId(u string)\n")...)
+	content = append(content, []byte("	GetUserId() string\n")...)
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("var MsgInfos map[int]MsgInfo\n")...)
@@ -138,6 +139,9 @@ func GenMsgInfo(name string) {
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("func (this *"+name+") Process() {\n")...)
+	if len(name) > 0 && name[0] == 'S' {
+		content = append(content, []byte("	//")...)
+	}
 	content = append(content, []byte("	new("+name+"Process).Process(this)\n")...)
 	content = append(content, []byte("}\n")...)
 
@@ -149,6 +153,11 @@ func GenMsgInfo(name string) {
 }
 
 func GenMsgProcess(name string) {
+	// S开头的协议不用生成Process文件
+	if len(name) > 0 && name[0] == 'S' {
+		return
+	}
+
 	// 文件存在，可能有写具体的处理逻辑，生成代码会覆盖，所以直接返回
 	filename := "../message/" + name + "Process.go"
 	_, err := os.Stat(filename)

@@ -18,11 +18,19 @@
 		},
 		{
 			"MsgType" : 1005,
-			"MsgName" : "CAddMoney"
+			"MsgName" : "CCreateRole"
 		},
 		{
 			"MsgType" : 1006,
-			"MsgName" : "SAddMoney"
+			"MsgName" : "SCreateRole"
+		},
+		{
+			"MsgType" : 1007,
+			"MsgName" : "CAddMoney"
+		},
+		{
+			"MsgType" : 1008,
+			"MsgName" : "SMoneyInfo"
 		}
 	]
 }

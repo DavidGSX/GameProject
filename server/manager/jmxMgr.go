@@ -14,7 +14,7 @@ var jmxWG *sync.WaitGroup
 func JMXInit(cfg *config.ServerConfig, wg *sync.WaitGroup) {
 	ip := cfg.JMXConfig.JMXIP
 	port := cfg.JMXConfig.JMXPort
-	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(port))
+	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(int(port)))
 	if err != nil {
 		log.Fatal("JMX Listen Error:", err)
 	}
