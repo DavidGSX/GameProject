@@ -1,8 +1,9 @@
 package main
 
 import (
-	"gameproject/server/cache"
+	"gameproject/server/cacheMgr"
 	"gameproject/server/config"
+	"gameproject/server/lockMgr"
 	"gameproject/server/manager"
 	"gameproject/server/message"
 	"sync"
@@ -18,9 +19,11 @@ func main() {
 	// 服务器协议初始化
 	message.Init()
 	// 数据缓存和数据库连接池初始化
-	cache.CacheInit(cfg)
+	cacheMgr.CacheInit(cfg)
+	// 锁管理器的初始化
+	lockMgr.LockMgrInit()
 
-	<-time.After(5e9) // 5秒初始化时间
+	<-time.After(3e9) // 3秒初始化时间
 
 	go manager.LinkMgrInit(cfg)
 	go manager.GlobalMgrInit(cfg)

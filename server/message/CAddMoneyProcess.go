@@ -2,8 +2,8 @@ package message
 
 import (
 	"gameproject/common"
-	"gameproject/server/cache"
-	"gameproject/server/lock"
+	"gameproject/server/cacheMgr"
+	"gameproject/server/lockMgr"
 	"gameproject/server/protocol"
 	"log"
 	"strconv"
@@ -19,10 +19,10 @@ func (this *CAddMoneyProcess) Process(msg *CAddMoney) {
 	this.msg = msg
 
 	k := "MONEY" + strconv.FormatUint(msg.Proto.RoleId, 10)
-	lock.GetLockMgr().Lock(k)
-	defer lock.GetLockMgr().Unlock(k)
+	lockMgr.Lock(k)
+	defer lockMgr.Unlock(k)
 
-	v := cache.GetKV(k)
+	v := cacheMgr.GetKV(k)
 	sendInfo := &protocol.SMoneyInfo{}
 	sendInfo.RoleId = msg.Proto.RoleId
 	if v == "" {
@@ -33,7 +33,7 @@ func (this *CAddMoneyProcess) Process(msg *CAddMoney) {
 	}
 
 	sendInfo.Total += msg.Proto.Num
-	cache.SetKV(k, strconv.Itoa(int(sendInfo.Total)))
+	cacheMgr.SetKV(k, strconv.Itoa(int(sendInfo.Total)))
 
 	data, err := proto.Marshal(sendInfo)
 	if err != nil {

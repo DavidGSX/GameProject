@@ -13,7 +13,7 @@ func main() {
 	cfg := config.GetConfig()
 	cfg.Show()
 	manager.GetPlatMgr().Init(cfg)
-	<-time.After(5e9) // 5秒初始化时间
+	<-time.After(3e9) // 3秒初始化时间
 
 	go manager.InitHttpCallback(cfg)
 	go manager.InitAuthor(cfg)

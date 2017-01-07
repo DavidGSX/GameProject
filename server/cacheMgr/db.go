@@ -1,4 +1,4 @@
-package cache
+package cacheMgr
 
 import (
 	"gameproject/server/config"

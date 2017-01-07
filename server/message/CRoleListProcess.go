@@ -2,7 +2,7 @@ package message
 
 import (
 	"gameproject/common"
-	"gameproject/server/cache"
+	"gameproject/server/cacheMgr"
 	"gameproject/server/protocol"
 	"log"
 
@@ -17,7 +17,7 @@ func (this *CRoleListProcess) Process(msg *CRoleList) {
 	this.msg = msg
 
 	k := "USER" + msg.Link.GetUserId()
-	v := cache.GetKV(k)
+	v := cacheMgr.GetKV(k)
 
 	sendInfo := &protocol.SRoleList{}
 	if v != "" {
