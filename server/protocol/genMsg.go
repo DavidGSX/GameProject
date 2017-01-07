@@ -21,9 +21,7 @@ type MsgMgr struct {
 }
 
 func (this *MsgInfo) Show() {
-	log.Println("MsgType :", this.MsgType)
-	log.Println("MsgName :", this.MsgName)
-	log.Println()
+	log.Println("MsgType:", this.MsgType, "MsgName:", this.MsgName)
 }
 
 func (this *MsgMgr) Show() {
