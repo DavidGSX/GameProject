@@ -122,9 +122,9 @@ func (this *Link) OnReceive() {
 		if err != nil {
 			log.Panic("Unmarshal Protocol Error:", err, " Type:", msgType)
 		}
-		msg.SetRoleId(this.roleId)
-		msg.SetLink(this)
-		msg.SetGlobal(GetGlobalConn())
+		msg.Setr(this.roleId)
+		msg.Setl(this)
+		msg.Setg(GetGlobalConn())
 		msg.Process()
 
 		this.recvBuf = this.recvBuf[oct.Pos():]

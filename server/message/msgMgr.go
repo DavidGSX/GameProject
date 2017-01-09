@@ -1,10 +1,14 @@
 package message
 
+// 避免与协议的函数名称重复，函数的命名有点特殊
 type MsgInfo interface {
 	Clone() MsgInfo
-	SetRoleId(r uint64)
-	SetLink(s ISend)
-	SetGlobal(s ISend)
+	Setr(r uint64)
+	Getr() uint64
+	Setl(s ISend)
+	Getl() ISend
+	Setg(s ISend)
+	Getg() ISend
 	Unmarshal(data []byte) error
 	Process()
 }

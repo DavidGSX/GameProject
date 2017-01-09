@@ -9,33 +9,33 @@ import (
 )
 
 type CUserLoginProcess struct {
-	msg *CUserLogin
+	CUserLogin
 }
 
-func (this *CUserLoginProcess) Process(msg *CUserLogin) {
+func (this *CUserLoginProcess) Process() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println("CUserLoginProcess Error:", err)
 		}
 	}()
 
-	userId := msg.Proto.UserId
-	token := msg.Proto.Token
+	userId := this.UserId
+	token := this.Token
 
 	log.Println("UserId:", userId, " Token:", token)
-	msg.Link.SetUserId(userId)
+	this.Getl().SetUserId(userId)
 
 	send := &protocol.SGUserAuth{}
 	send.UserId = userId
 	send.Token = token
 	data, err := proto.Marshal(send)
 	if err != nil {
-		log.Println("Marshal SGUserAuth error:", err)
+		log.Println("CUserLoginProcess Marshal SGUserAuth error:", err)
 		return
 	}
 	oct := &common.Octets{}
 	oct.MarshalUint32(uint32(len(data)))
 	oct.MarshalUint32(2)
 	oct.MarshalBytesOnly(data)
-	msg.Global.Send(oct.GetBuf())
+	this.Getg().Send(oct.GetBuf())
 }

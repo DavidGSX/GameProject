@@ -1,22 +1,17 @@
 package message
 
 import (
-	"gameproject/common"
 	"gameproject/server/cacheMgr"
 	"gameproject/server/protocol"
 	"log"
-
-	"github.com/golang/protobuf/proto"
 )
 
 type CCreateRoleProcess struct {
-	msg *CCreateRole
+	CCreateRole
 }
 
-func (this *CCreateRoleProcess) Process(msg *CCreateRole) {
-	this.msg = msg
-
-	k := "NAME" + msg.Proto.Name
+func (this *CCreateRoleProcess) Process() {
+	k := "NAME" + this.Name
 	v := cacheMgr.GetKV(k)
 
 	sendInfo := &protocol.SCreateRole{}
@@ -26,17 +21,12 @@ func (this *CCreateRoleProcess) Process(msg *CCreateRole) {
 	sendInfo.Res = protocol.SCreateRole_SUCCESS
 	sendInfo.Info = &protocol.SRoleList_RoleInfo{}
 	sendInfo.Info.RoleId = 123456789
-	sendInfo.Info.RoleName = msg.Proto.Name
+	sendInfo.Info.RoleName = this.Name
 	sendInfo.Info.Level = 1
-	sendInfo.Info.School = msg.Proto.School
+	sendInfo.Info.School = this.School
 	sendInfo.Info.ShowFashion = true
-	data, err := proto.Marshal(sendInfo)
+	err := this.Send(sendInfo)
 	if err != nil {
-		log.Panic("marshal error:", err)
+		log.Panic("CCreateRoleProcess Send SCreateRole error:", err)
 	}
-	oct := &common.Octets{}
-	oct.MarshalUint32(uint32(len(data)))
-	oct.MarshalUint32(1006)
-	oct.MarshalBytesOnly(data)
-	msg.Link.Send(oct.GetBuf())
 }

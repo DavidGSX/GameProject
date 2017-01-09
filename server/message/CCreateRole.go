@@ -1,39 +1,72 @@
 package message
 
 import (
+	"gameproject/common"
 	"gameproject/server/protocol"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type CCreateRole struct {
-	Link   ISend
-	Global ISend
-	RoleId uint64
-	Proto  protocol.CCreateRole
+	protocol.CCreateRole
+	l ISend  // Link缩写
+	g ISend  // Global缩写
+	r uint64 // RoleId缩写
 }
 
 func (this *CCreateRole) Clone() MsgInfo {
 	return new(CCreateRole)
 }
 
-func (this *CCreateRole) SetRoleId(r uint64) {
-	this.RoleId = r
+func (this *CCreateRole) MsgType() uint32 {
+	return 1005
 }
 
-func (this *CCreateRole) SetLink(s ISend) {
-	this.Link = s
+// 避免与协议的函数名称重复，以下函数命名有点特殊
+func (this *CCreateRole) Setr(r uint64) {
+	this.r = r
 }
 
-func (this *CCreateRole) SetGlobal(s ISend) {
-	this.Global = s
+func (this *CCreateRole) Getr() uint64 {
+	return this.r
+}
+
+func (this *CCreateRole) Setl(s ISend) {
+	this.l = s
+}
+
+func (this *CCreateRole) Getl() ISend {
+	return this.l
+}
+
+func (this *CCreateRole) Setg(s ISend) {
+	this.g = s
+}
+
+func (this *CCreateRole) Getg() ISend {
+	return this.g
 }
 
 func (this *CCreateRole) Unmarshal(data []byte) error {
-	err := proto.Unmarshal(data, &this.Proto)
+	err := proto.Unmarshal(data, &this.CCreateRole)
 	return err
 }
 
+func (this *CCreateRole) Send(msg proto.Message) error {
+	data, err := proto.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	oct := &common.Octets{}
+	oct.MarshalUint32(uint32(len(data)))
+	oct.MarshalUint32(this.MsgType())
+	oct.MarshalBytesOnly(data)
+	this.Getl().Send(oct.GetBuf())
+	return nil
+}
+
 func (this *CCreateRole) Process() {
-	new(CCreateRoleProcess).Process(this)
+	p := new(CCreateRoleProcess)
+	p.CCreateRole = *this
+	p.Process()
 }

@@ -1,22 +1,17 @@
 package message
 
 import (
-	"gameproject/common"
 	"gameproject/server/cacheMgr"
 	"gameproject/server/protocol"
 	"log"
-
-	"github.com/golang/protobuf/proto"
 )
 
 type CRoleListProcess struct {
-	msg *CRoleList
+	CRoleList
 }
 
-func (this *CRoleListProcess) Process(msg *CRoleList) {
-	this.msg = msg
-
-	k := "USER" + msg.Link.GetUserId()
+func (this *CRoleListProcess) Process() {
+	k := "USER" + this.Getl().GetUserId()
 	v := cacheMgr.GetKV(k)
 
 	sendInfo := &protocol.SRoleList{}
@@ -24,13 +19,8 @@ func (this *CRoleListProcess) Process(msg *CRoleList) {
 		// Decode DB Data
 	}
 	sendInfo.PreLoginRoleId = 1
-	data, err := proto.Marshal(sendInfo)
+	err := this.Send(sendInfo)
 	if err != nil {
-		log.Panic("marshal error:", err)
+		log.Panic("CRoleListProcess Send SRoleList error:", err)
 	}
-	oct := &common.Octets{}
-	oct.MarshalUint32(uint32(len(data)))
-	oct.MarshalUint32(1004)
-	oct.MarshalBytesOnly(data)
-	msg.Link.Send(oct.GetBuf())
 }
