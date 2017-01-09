@@ -3,8 +3,27 @@ syntax = "proto3";
 package dbProto;
 
 message Name {
-	string roleName = 1;
-	string userId = 2;
-	uint64 roleId = 3;
-	uint64 createTime = 4;
+	string userId = 1;
+	uint64 roleId = 2;
+	uint64 createTime = 3;
+}
+
+message User {
+	repeated uint64 roleIdList = 1;
+	uint64 lastLoginRoleId = 2;
+	uint64 createTime = 3;
+	uint64 flag = 4;		// 账号分享状态
+}
+
+message Property {
+	string userId = 1;
+	string roleName = 2;
+	uint64 createTime = 3;
+	uint32 school = 4;
+	uint32 sex = 5;
+	uint32 level = 6;
+	uint32 exp = 7;
+	uint32 allExp = 8;
+	uint32 money = 9;
+	uint32 yuanbao = 10;
 }

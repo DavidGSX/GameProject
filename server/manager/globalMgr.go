@@ -2,9 +2,9 @@ package manager
 
 import (
 	"gameproject/common"
-	globalpro "gameproject/global/protocol"
+	"gameproject/global/protocol"
 	"gameproject/server/config"
-	serverpro "gameproject/server/protocol"
+	"gameproject/server/msgProto"
 	"log"
 	"net"
 	"strconv"
@@ -71,7 +71,7 @@ func (this *GlobalConn) OnRegisterGlobal(cfg *config.ServerConfig) {
 		}
 	}()
 
-	send := &globalpro.SGServerStart{}
+	send := &protocol.SGServerStart{}
 	send.ZoneId = cfg.GetZoneId()
 	send.Plat = cfg.GetPlatform()
 	data, err := proto.Marshal(send)
@@ -158,7 +158,7 @@ func (this *GlobalConn) OnReceive() {
 }
 
 func (this *GlobalConn) OnAuthResult(b []byte) {
-	res := &globalpro.GSAuthResult{}
+	res := &protocol.GSAuthResult{}
 	err := proto.Unmarshal(b, res)
 	if err != nil {
 		log.Println("unmarshal GSAuthResult error:", err)
@@ -171,14 +171,14 @@ func (this *GlobalConn) OnAuthResult(b []byte) {
 	log.Println("OnAuthResult userId:", userId, " plat:", plat, " result:", result)
 	link := GetLinkMgr().GetLinkByUserId(userId)
 
-	loginRes := &serverpro.SUserLogin{}
+	loginRes := &msgProto.SUserLogin{}
 	if result == "ok" {
-		loginRes.LoginRes = serverpro.SUserLogin_SUCCESS
+		loginRes.LoginRes = msgProto.SUserLogin_SUCCESS
 		if link != nil {
 			link.SetAuthored()
 		}
 	} else {
-		loginRes.LoginRes = serverpro.SUserLogin_PASSWD_ERR
+		loginRes.LoginRes = msgProto.SUserLogin_PASSWD_ERR
 	}
 	data, err := proto.Marshal(loginRes)
 	if err != nil {

@@ -2,13 +2,13 @@ package message
 
 import (
 	"gameproject/common"
-	"gameproject/server/protocol"
+	"gameproject/server/msgProto"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type SMoneyInfo struct {
-	protocol.SMoneyInfo
+	msgProto.SMoneyInfo
 	l ISend  // Link缩写
 	g ISend  // Global缩写
 	r uint64 // RoleId缩写
@@ -20,6 +20,10 @@ func (this *SMoneyInfo) Clone() MsgInfo {
 
 func (this *SMoneyInfo) MsgType() uint32 {
 	return 1008
+}
+
+func (this *SMoneyInfo) GetMsg() proto.Message {
+	return &this.SMoneyInfo
 }
 
 // 避免与协议的函数名称重复，以下函数命名有点特殊
@@ -52,14 +56,14 @@ func (this *SMoneyInfo) Unmarshal(data []byte) error {
 	return err
 }
 
-func (this *SMoneyInfo) Send(msg proto.Message) error {
-	data, err := proto.Marshal(msg)
+func (this *SMoneyInfo) Send(msg MsgInfo) error {
+	data, err := proto.Marshal(msg.GetMsg())
 	if err != nil {
 		return err
 	}
 	oct := &common.Octets{}
 	oct.MarshalUint32(uint32(len(data)))
-	oct.MarshalUint32(this.MsgType())
+	oct.MarshalUint32(msg.MsgType())
 	oct.MarshalBytesOnly(data)
 	this.Getl().Send(oct.GetBuf())
 	return nil

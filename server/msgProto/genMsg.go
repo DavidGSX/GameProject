@@ -1,4 +1,4 @@
-package protocol
+package msgProto
 
 import (
 	"encoding/json"
@@ -58,9 +58,15 @@ func (this *MsgMgr) Gen() {
 	content := make([]byte, 0)
 	content = append(content, []byte("package message\n")...)
 	content = append(content, []byte("\n")...)
+	content = append(content, []byte("import (\n")...)
+	content = append(content, []byte("	\"github.com/golang/protobuf/proto\"\n")...)
+	content = append(content, []byte(")\n")...)
+	content = append(content, []byte("\n")...)
 	content = append(content, []byte("// 避免与协议的函数名称重复，函数的命名有点特殊\n")...)
 	content = append(content, []byte("type MsgInfo interface {\n")...)
 	content = append(content, []byte("	Clone() MsgInfo\n")...)
+	content = append(content, []byte("	MsgType() uint32\n")...)
+	content = append(content, []byte("	GetMsg() proto.Message\n")...)
 	content = append(content, []byte("	Setr(r uint64)\n")...)
 	content = append(content, []byte("	Getr() uint64\n")...)
 	content = append(content, []byte("	Setl(s ISend)\n")...)
@@ -68,6 +74,7 @@ func (this *MsgMgr) Gen() {
 	content = append(content, []byte("	Setg(s ISend)\n")...)
 	content = append(content, []byte("	Getg() ISend\n")...)
 	content = append(content, []byte("	Unmarshal(data []byte) error\n")...)
+	content = append(content, []byte("	Send(MsgInfo) error\n")...)
 	content = append(content, []byte("	Process()\n")...)
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
@@ -108,13 +115,13 @@ func (this *MsgMgr) GenMsgInfo(name string) {
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("import (\n")...)
 	content = append(content, []byte("	\"gameproject/common\"\n")...)
-	content = append(content, []byte("	\"gameproject/server/protocol\"\n")...)
+	content = append(content, []byte("	\"gameproject/server/msgProto\"\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("	\"github.com/golang/protobuf/proto\"\n")...)
 	content = append(content, []byte(")\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("type "+name+" struct {\n")...)
-	content = append(content, []byte("	protocol."+name+"\n")...)
+	content = append(content, []byte("	msgProto."+name+"\n")...)
 	content = append(content, []byte("	l ISend  // Link缩写\n")...)
 	content = append(content, []byte("	g ISend  // Global缩写\n")...)
 	content = append(content, []byte("	r uint64 // RoleId缩写\n")...)
@@ -131,6 +138,10 @@ func (this *MsgMgr) GenMsgInfo(name string) {
 	} else {
 		log.Panic("Get MsgType from Name Error:", name)
 	}
+	content = append(content, []byte("}\n")...)
+	content = append(content, []byte("\n")...)
+	content = append(content, []byte("func (this *"+name+") GetMsg() proto.Message {\n")...)
+	content = append(content, []byte("	return &this."+name+"\n")...)
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("// 避免与协议的函数名称重复，以下函数命名有点特殊\n")...)
@@ -163,14 +174,14 @@ func (this *MsgMgr) GenMsgInfo(name string) {
 	content = append(content, []byte("	return err\n")...)
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
-	content = append(content, []byte("func (this *"+name+") Send(msg proto.Message) error {\n")...)
-	content = append(content, []byte("	data, err := proto.Marshal(msg)\n")...)
+	content = append(content, []byte("func (this *"+name+") Send(msg MsgInfo) error {\n")...)
+	content = append(content, []byte("	data, err := proto.Marshal(msg.GetMsg())\n")...)
 	content = append(content, []byte("	if err != nil {\n")...)
 	content = append(content, []byte("		return err\n")...)
 	content = append(content, []byte("	}\n")...)
 	content = append(content, []byte("	oct := &common.Octets{}\n")...)
 	content = append(content, []byte("	oct.MarshalUint32(uint32(len(data)))\n")...)
-	content = append(content, []byte("	oct.MarshalUint32(this.MsgType())\n")...)
+	content = append(content, []byte("	oct.MarshalUint32(msg.MsgType())\n")...)
 	content = append(content, []byte("	oct.MarshalBytesOnly(data)\n")...)
 	content = append(content, []byte("	this.Getl().Send(oct.GetBuf())\n")...)
 	content = append(content, []byte("	return nil\n")...)
@@ -189,7 +200,7 @@ func (this *MsgMgr) GenMsgInfo(name string) {
 	filename := "../message/" + name + ".go"
 	err := ioutil.WriteFile(filename, content, 0666)
 	if err != nil {
-		log.Panic("Write MsgMgr.go Error:", err)
+		log.Panic("Write "+name+".go Error:", err)
 	}
 }
 
@@ -224,7 +235,7 @@ func GenMsgProcess(name string) {
 
 	err = ioutil.WriteFile(filename, content, 0666)
 	if err != nil {
-		log.Panic("Write MsgMgr.go Error:", err)
+		log.Panic("Write "+name+".go Error:", err)
 	}
 }
 

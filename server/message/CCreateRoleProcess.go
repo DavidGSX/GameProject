@@ -2,8 +2,10 @@ package message
 
 import (
 	"gameproject/server/cacheMgr"
-	"gameproject/server/protocol"
+	"gameproject/server/msgProto"
+	"gameproject/server/table"
 	"log"
+	"time"
 )
 
 type CCreateRoleProcess struct {
@@ -11,16 +13,45 @@ type CCreateRoleProcess struct {
 }
 
 func (this *CCreateRoleProcess) Process() {
-	k := "NAME" + this.Name
-	v := cacheMgr.GetKV(k)
-
-	sendInfo := &protocol.SCreateRole{}
-	if v != "" {
-		sendInfo.Res = protocol.SCreateRole_NAME_DUPLICATED
+	sendInfo := &SCreateRole{}
+	t := table.GetName(this.Name)
+	var rId uint64
+	if t != nil {
+		sendInfo.Res = msgProto.SCreateRole_NAME_DUPLICATED
+	} else {
+		t = table.NewName(this.Name)
+		t.UserId = this.Getl().GetUserId()
+		rId = cacheMgr.GetNextRoleId()
+		t.RoleId = rId
+		t.CreateTime = uint64(time.Now().Unix())
+		t.Save()
 	}
-	sendInfo.Res = protocol.SCreateRole_SUCCESS
-	sendInfo.Info = &protocol.SRoleList_RoleInfo{}
-	sendInfo.Info.RoleId = 123456789
+
+	p := table.GetProperty(rId)
+	if p != nil {
+		log.Panic("CCreateRoleProcess Role Id Duplicate rId:", rId)
+	}
+	p = table.NewProperty(rId)
+	p.UserId = this.Getl().GetUserId()
+	p.RoleName = this.Name
+	p.CreateTime = uint64(time.Now().Unix())
+	p.School = this.School
+	p.Sex = this.Sex
+	p.Level = 1
+	p.Save()
+
+	u := table.GetUser(this.Getl().GetUserId())
+	if u == nil {
+		u = table.NewUser(this.Getl().GetUserId())
+	}
+	u.RoleIdList = append(u.RoleIdList, rId)
+	u.LastLoginRoleId = rId
+	u.CreateTime = uint64(time.Now().Unix())
+	u.Save()
+
+	sendInfo.Res = msgProto.SCreateRole_SUCCESS
+	sendInfo.Info = &msgProto.SRoleList_RoleInfo{}
+	sendInfo.Info.RoleId = rId
 	sendInfo.Info.RoleName = this.Name
 	sendInfo.Info.Level = 1
 	sendInfo.Info.School = this.School

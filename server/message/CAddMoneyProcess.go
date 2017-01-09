@@ -1,9 +1,8 @@
 package message
 
 import (
-	"gameproject/server/cacheMgr"
 	"gameproject/server/lockMgr"
-	"gameproject/server/protocol"
+	"gameproject/server/table"
 	"log"
 	"strconv"
 )
@@ -17,18 +16,18 @@ func (this *CAddMoneyProcess) Process() {
 	lockMgr.Lock(k)
 	defer lockMgr.Unlock(k)
 
-	v := cacheMgr.GetKV(k)
-	sendInfo := &protocol.SMoneyInfo{}
+	sendInfo := &SMoneyInfo{}
 	sendInfo.RoleId = this.RoleId
-	if v == "" {
-		sendInfo.Total = 0
-	} else {
-		i, _ := strconv.Atoi(v)
-		sendInfo.Total = uint32(i)
-	}
 
-	sendInfo.Total += this.Num
-	cacheMgr.SetKV(k, strconv.Itoa(int(sendInfo.Total)))
+	v := table.GetProperty(this.RoleId)
+	if v == nil {
+		log.Panic("CAddMoneyProcess Role Not Exist RoleId:", this.RoleId)
+	} else {
+		v.Money += this.Num
+	}
+	v.Save()
+
+	sendInfo.Total += v.Money
 	err := this.Send(sendInfo)
 	if err != nil {
 		log.Panic("CAddMoneyProcess Send SMoneyInfo error:", err)

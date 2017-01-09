@@ -1,8 +1,14 @@
 package message
 
+import (
+	"github.com/golang/protobuf/proto"
+)
+
 // 避免与协议的函数名称重复，函数的命名有点特殊
 type MsgInfo interface {
 	Clone() MsgInfo
+	MsgType() uint32
+	GetMsg() proto.Message
 	Setr(r uint64)
 	Getr() uint64
 	Setl(s ISend)
@@ -10,6 +16,7 @@ type MsgInfo interface {
 	Setg(s ISend)
 	Getg() ISend
 	Unmarshal(data []byte) error
+	Send(MsgInfo) error
 	Process()
 }
 

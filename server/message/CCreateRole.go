@@ -2,13 +2,13 @@ package message
 
 import (
 	"gameproject/common"
-	"gameproject/server/protocol"
+	"gameproject/server/msgProto"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type CCreateRole struct {
-	protocol.CCreateRole
+	msgProto.CCreateRole
 	l ISend  // Link缩写
 	g ISend  // Global缩写
 	r uint64 // RoleId缩写
@@ -20,6 +20,10 @@ func (this *CCreateRole) Clone() MsgInfo {
 
 func (this *CCreateRole) MsgType() uint32 {
 	return 1005
+}
+
+func (this *CCreateRole) GetMsg() proto.Message {
+	return &this.CCreateRole
 }
 
 // 避免与协议的函数名称重复，以下函数命名有点特殊
@@ -52,14 +56,14 @@ func (this *CCreateRole) Unmarshal(data []byte) error {
 	return err
 }
 
-func (this *CCreateRole) Send(msg proto.Message) error {
-	data, err := proto.Marshal(msg)
+func (this *CCreateRole) Send(msg MsgInfo) error {
+	data, err := proto.Marshal(msg.GetMsg())
 	if err != nil {
 		return err
 	}
 	oct := &common.Octets{}
 	oct.MarshalUint32(uint32(len(data)))
-	oct.MarshalUint32(this.MsgType())
+	oct.MarshalUint32(msg.MsgType())
 	oct.MarshalBytesOnly(data)
 	this.Getl().Send(oct.GetBuf())
 	return nil
