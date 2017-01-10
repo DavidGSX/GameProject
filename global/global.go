@@ -13,10 +13,12 @@ func main() {
 	cfg := config.GetConfig()
 	cfg.Show()
 	manager.GetPlatMgr().Init(cfg)
+	manager.DBInit(cfg)
 	<-time.After(3e9) // 3秒初始化时间
 
 	go manager.InitHttpCallback(cfg)
 	go manager.InitAuthor(cfg)
+	go manager.InitRPC(cfg)
 	go manager.InitJMX(cfg, &wg)
 
 	wg.Add(1)

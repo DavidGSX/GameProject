@@ -9,13 +9,13 @@ import (
 )
 
 func InitHttpCallback(cfg *config.GlobalConfig) {
-	ip := cfg.HttpConfig.CallbackIP
-	port := cfg.HttpConfig.CallbackPort
+	ip := cfg.BaseConfig.CallbackIP
+	port := cfg.BaseConfig.CallbackPort
 
 	http.HandleFunc("/", CallbackServer)
 
 	log.Println("HttpCallback Listen ", ip, port)
-	err := http.ListenAndServe(ip+":"+strconv.Itoa(port), nil)
+	err := http.ListenAndServe(ip+":"+strconv.Itoa(int(port)), nil)
 	if err != nil {
 		log.Fatal("HttpCallback Listen Error:", err)
 	}

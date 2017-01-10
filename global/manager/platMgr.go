@@ -116,7 +116,7 @@ func (this *PlatMgr) LoadPlatSet(cfg *config.GlobalConfig) {
 		log.Panic("PlatMgr.LoadPlatSet cfg is nil")
 	}
 
-	tmpCfgMap := make(map[int]config.PlatConfig)
+	tmpCfgMap := make(map[uint32]config.PlatConfig)
 	for _, v := range cfg.PlatConfigs {
 		id := v.PlatID
 		_, ok := tmpCfgMap[id]

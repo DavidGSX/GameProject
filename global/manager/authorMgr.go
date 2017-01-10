@@ -59,9 +59,9 @@ func (this *AuthorMgr) GetServer(zoneId uint32) *Server {
 }
 
 func InitAuthor(cfg *config.GlobalConfig) {
-	ip := cfg.HttpConfig.AuthorizeIP
-	port := cfg.HttpConfig.AuthorizePort
-	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(port))
+	ip := cfg.BaseConfig.AuthorizeIP
+	port := cfg.BaseConfig.AuthorizePort
+	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(int(port)))
 	if err != nil {
 		log.Fatal("Author Listen Error:", err)
 	}

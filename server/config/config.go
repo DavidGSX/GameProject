@@ -35,12 +35,18 @@ type GlobalConfig struct {
 	GlobalPort uint32 // 连接Global的端口
 }
 
+type RPCConfig struct {
+	RPCIP   string // 连接RPC的IP
+	RPCPort uint32 // 连接RPC的端口
+}
+
 type ServerConfig struct {
 	BaseConfig   BaseConfig   // 基础信息配置
 	DBConfig     DBConfig     // 数据库配置
 	JMXConfig    JMXConfig    // JMX的配置
 	LinkConfig   LinkConfig   // Link的配置
 	GlobalConfig GlobalConfig // Global的配置
+	RPCConfig    RPCConfig    // RPC的配置
 }
 
 var config *ServerConfig
@@ -136,6 +142,15 @@ func (this *GlobalConfig) Show() {
 	log.Println()
 }
 
+func (this *RPCConfig) Show() {
+	if this == nil {
+		return
+	}
+	log.Println("RPCIP:", this.RPCIP)
+	log.Println("RPCPort:", this.RPCPort)
+	log.Println()
+}
+
 func (this *ServerConfig) Show() {
 	if this == nil {
 		return
@@ -145,4 +160,5 @@ func (this *ServerConfig) Show() {
 	this.JMXConfig.Show()
 	this.LinkConfig.Show()
 	this.GlobalConfig.Show()
+	this.RPCConfig.Show()
 }

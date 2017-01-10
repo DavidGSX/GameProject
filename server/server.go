@@ -6,6 +6,7 @@ import (
 	"gameproject/server/lockMgr"
 	"gameproject/server/manager"
 	"gameproject/server/message"
+	"gameproject/server/rpcMgr"
 	"sync"
 	"time"
 )
@@ -22,6 +23,8 @@ func main() {
 	cacheMgr.CacheInit(cfg)
 	// 锁管理器的初始化
 	lockMgr.LockMgrInit()
+	// RPC初始化
+	rpcMgr.RPCInit(cfg)
 
 	<-time.After(3e9) // 3秒初始化时间
 

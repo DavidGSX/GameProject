@@ -12,8 +12,8 @@ type Plat struct {
 	AppID       string // 游戏在渠道平台注册后的ID
 	AppKey      string // 游戏在渠道平台注册后的key
 	AppSecret   string // 游戏在渠道平台注册后的密钥（有些平台不需要）
-	ConnTimeOut int    // 连接超时时间，单位秒，默认为5秒
-	ReadTimeOut int    // 读取超时时间，单位秒，默认为3秒
+	ConnTimeOut uint32 // 连接超时时间，单位秒，默认为5秒
+	ReadTimeOut uint32 // 读取超时时间，单位秒，默认为3秒
 }
 
 type IClass interface {

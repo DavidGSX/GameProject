@@ -12,9 +12,9 @@ import (
 var jmxWG *sync.WaitGroup
 
 func InitJMX(cfg *config.GlobalConfig, wg *sync.WaitGroup) {
-	ip := cfg.HttpConfig.JMXIP
-	port := cfg.HttpConfig.JMXPort
-	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(port))
+	ip := cfg.BaseConfig.JMXIP
+	port := cfg.BaseConfig.JMXPort
+	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(int(port)))
 	if err != nil {
 		log.Fatal("JMX Listen Error:", err)
 	}

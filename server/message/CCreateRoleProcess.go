@@ -3,6 +3,7 @@ package message
 import (
 	"gameproject/server/cacheMgr"
 	"gameproject/server/msgProto"
+	"gameproject/server/rpcMgr"
 	"gameproject/server/table"
 	"log"
 	"time"
@@ -14,18 +15,27 @@ type CCreateRoleProcess struct {
 
 func (this *CCreateRoleProcess) Process() {
 	sendInfo := &SCreateRole{}
-	t := table.GetName(this.Name)
 	var rId uint64
-	if t != nil {
+	if rpcMgr.NameExist(this.Name) {
 		sendInfo.Res = msgProto.SCreateRole_NAME_DUPLICATED
 	} else {
-		t = table.NewName(this.Name)
-		t.UserId = this.Getl().GetUserId()
 		rId = cacheMgr.GetNextRoleId()
-		t.RoleId = rId
-		t.CreateTime = uint64(time.Now().Unix())
-		t.Save()
+		rpcMgr.NameInsert(this.Name)
 	}
+
+	/*
+		t := table.GetName(this.Name)
+		if t != nil {
+			sendInfo.Res = msgProto.SCreateRole_NAME_DUPLICATED
+		} else {
+			t = table.NewName(this.Name)
+			t.UserId = this.Getl().GetUserId()
+			rId = cacheMgr.GetNextRoleId()
+			t.RoleId = rId
+			t.CreateTime = uint64(time.Now().Unix())
+			t.Save()
+		}
+	*/
 
 	p := table.GetProperty(rId)
 	if p != nil {

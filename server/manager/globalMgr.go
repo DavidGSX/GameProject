@@ -32,6 +32,11 @@ func GetGlobalConn() *GlobalConn {
 }
 
 func ReConnectGlobal() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("ReConnectGlobal Error:", err)
+		}
+	}()
 	<-time.After(1e10) // 10秒钟后重连Global
 	if globalConn != nil && globalConn.cfg != nil {
 		GlobalMgrInit(globalConn.cfg)
