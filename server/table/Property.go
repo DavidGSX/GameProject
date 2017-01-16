@@ -4,6 +4,8 @@ import (
 	"gameproject/common"
 	"gameproject/server/cacheMgr"
 	"gameproject/server/dbProto"
+	"gameproject/server/lockMgr"
+	"gameproject/server/transMgr"
 	"log"
 	"strconv"
 
@@ -19,17 +21,21 @@ func (this *Property) IsSave() bool {
 	return true
 }
 
-func NewProperty(k uint64) *Property {
-	ret := new(Property)
-	ret.k = "Property_" + strconv.FormatUint(k,10)
-	return ret
+func NewProperty(t *transMgr.Trans, k uint64) *Property {
+	r := new(Property)
+	r.k = "Property_" + strconv.FormatUint(k,10)
+	if t != nil {
+		t.Save(r)
+	}
+	return r
 }
 
-func GetProperty(uk uint64) *Property {
+func GetProperty(t *transMgr.Trans, uk uint64) *Property {
 	if uk == 0 {
 		return nil
 	}
 	k := strconv.FormatUint(uk,10)
+	t.Lock("Property_" + k)
 	v := cacheMgr.GetKV("Property_" + k)
 	if v == "" {
 		return nil
@@ -38,17 +44,45 @@ func GetProperty(uk uint64) *Property {
 	oct := common.NewOctets([]byte(v))
 	size := oct.UnmarshalUint32()
 	if size != oct.Remain() {
-		log.Panic("table.Property Data Len Error:", k, ",", size, ",", len(v))
+		log.Panic("get table.Property Data Len Error:", k, ",", size, ",", len(v))
 		return nil
 	}
 	data := oct.UnmarshalBytesOnly(size)
-	t := NewProperty(uk)
-	err := proto.Unmarshal(data, &t.Property)
+	r := NewProperty(t, uk)
+	err := proto.Unmarshal(data, &r.Property)
 	if err != nil {
-		log.Panic("DB Data Unmarshal Error:", t.k)
+		log.Panic("get DB Data Unmarshal Error:", r.k)
 		return nil
 	}
-	return t
+	return r
+}
+
+func SelectProperty(uk uint64) *Property {
+	if uk == 0 {
+		return nil
+	}
+	k := strconv.FormatUint(uk,10)
+	lockMgr.Lock("Property_" + k)
+	defer lockMgr.Unlock("Property_" + k)
+	v := cacheMgr.GetKV("Property_" + k)
+	if v == "" {
+		return nil
+	}
+	
+	oct := common.NewOctets([]byte(v))
+	size := oct.UnmarshalUint32()
+	if size != oct.Remain() {
+		log.Panic("select table.Property Data Len Error:", k, ",", size, ",", len(v))
+		return nil
+	}
+	data := oct.UnmarshalBytesOnly(size)
+	r := NewProperty(nil, uk)
+	err := proto.Unmarshal(data, &r.Property)
+	if err != nil {
+		log.Panic("select DB Data Unmarshal Error:", r.k)
+		return nil
+	}
+	return r
 }
 
 func (this *Property) Save() error {

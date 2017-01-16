@@ -1,35 +1,31 @@
 package message
 
 import (
-	"gameproject/server/lockMgr"
 	"gameproject/server/table"
+	"gameproject/server/transMgr"
 	"log"
-	"strconv"
 )
 
 type CAddMoneyProcess struct {
-	CAddMoney
+	msg   *CAddMoney
+	trans *transMgr.Trans
 }
 
-func (this *CAddMoneyProcess) Process() {
-	k := "MONEY_" + strconv.FormatUint(this.RoleId, 10)
-	lockMgr.Lock(k)
-	defer lockMgr.Unlock(k)
-
+func (this *CAddMoneyProcess) Process() bool {
 	sendInfo := &SMoneyInfo{}
-	sendInfo.RoleId = this.RoleId
+	sendInfo.RoleId = this.msg.RoleId
 
-	v := table.GetProperty(this.RoleId)
+	v := table.GetProperty(this.trans, this.msg.RoleId)
 	if v == nil {
-		log.Panic("CAddMoneyProcess Role Not Exist RoleId:", this.RoleId)
+		log.Panic("CAddMoneyProcess Role Not Exist RoleId:", this.msg.RoleId)
 	} else {
-		v.Money += this.Num
+		v.Money += this.msg.Num
 	}
-	v.Save()
 
-	sendInfo.Total += v.Money
-	err := this.Send(sendInfo)
+	sendInfo.Total = v.Money
+	err := this.msg.Send(sendInfo)
 	if err != nil {
 		log.Panic("CAddMoneyProcess Send SMoneyInfo error:", err)
 	}
+	return true
 }

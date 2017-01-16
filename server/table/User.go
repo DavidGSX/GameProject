@@ -4,6 +4,8 @@ import (
 	"gameproject/common"
 	"gameproject/server/cacheMgr"
 	"gameproject/server/dbProto"
+	"gameproject/server/lockMgr"
+	"gameproject/server/transMgr"
 	"log"
 
 	"github.com/golang/protobuf/proto"
@@ -18,16 +20,20 @@ func (this *User) IsSave() bool {
 	return true
 }
 
-func NewUser(k string) *User {
-	ret := new(User)
-	ret.k = "User_" + k
-	return ret
+func NewUser(t *transMgr.Trans, k string) *User {
+	r := new(User)
+	r.k = "User_" + k
+	if t != nil {
+		t.Save(r)
+	}
+	return r
 }
 
-func GetUser(k string) *User {
+func GetUser(t *transMgr.Trans, k string) *User {
 	if k == "" {
 		return nil
 	}
+	t.Lock("User_" + k)
 	v := cacheMgr.GetKV("User_" + k)
 	if v == "" {
 		return nil
@@ -36,17 +42,44 @@ func GetUser(k string) *User {
 	oct := common.NewOctets([]byte(v))
 	size := oct.UnmarshalUint32()
 	if size != oct.Remain() {
-		log.Panic("table.User Data Len Error:", k, ",", size, ",", len(v))
+		log.Panic("get table.User Data Len Error:", k, ",", size, ",", len(v))
 		return nil
 	}
 	data := oct.UnmarshalBytesOnly(size)
-	t := NewUser(k)
-	err := proto.Unmarshal(data, &t.User)
+	r := NewUser(t, k)
+	err := proto.Unmarshal(data, &r.User)
 	if err != nil {
-		log.Panic("DB Data Unmarshal Error:", t.k)
+		log.Panic("get DB Data Unmarshal Error:", r.k)
 		return nil
 	}
-	return t
+	return r
+}
+
+func SelectUser(k string) *User {
+	if k == "" {
+		return nil
+	}
+	lockMgr.Lock("User_" + k)
+	defer lockMgr.Unlock("User_" + k)
+	v := cacheMgr.GetKV("User_" + k)
+	if v == "" {
+		return nil
+	}
+	
+	oct := common.NewOctets([]byte(v))
+	size := oct.UnmarshalUint32()
+	if size != oct.Remain() {
+		log.Panic("select table.User Data Len Error:", k, ",", size, ",", len(v))
+		return nil
+	}
+	data := oct.UnmarshalBytesOnly(size)
+	r := NewUser(nil, k)
+	err := proto.Unmarshal(data, &r.User)
+	if err != nil {
+		log.Panic("select DB Data Unmarshal Error:", r.k)
+		return nil
+	}
+	return r
 }
 
 func (this *User) Save() error {

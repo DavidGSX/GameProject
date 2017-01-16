@@ -3,6 +3,7 @@ package message
 import (
 	"gameproject/common"
 	"gameproject/server/msgProto"
+	"gameproject/server/transMgr"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -69,8 +70,9 @@ func (this *CUserLogin) Send(msg MsgInfo) error {
 	return nil
 }
 
-func (this *CUserLogin) Process() {
+func (this *CUserLogin) Process(t *transMgr.Trans) bool {
 	p := new(CUserLoginProcess)
-	p.CUserLogin = *this
-	p.Process()
+	p.msg = this
+	p.trans = t
+	return p.Process()
 }

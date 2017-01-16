@@ -3,6 +3,7 @@ package message
 import (
 	"gameproject/common"
 	"gameproject/server/msgProto"
+	"gameproject/server/transMgr"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -69,8 +70,9 @@ func (this *CAddMoney) Send(msg MsgInfo) error {
 	return nil
 }
 
-func (this *CAddMoney) Process() {
+func (this *CAddMoney) Process(t *transMgr.Trans) bool {
 	p := new(CAddMoneyProcess)
-	p.CAddMoney = *this
-	p.Process()
+	p.msg = this
+	p.trans = t
+	return p.Process()
 }

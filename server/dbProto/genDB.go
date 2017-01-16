@@ -52,6 +52,8 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 	content = append(content, []byte("	\"gameproject/common\"\n")...)
 	content = append(content, []byte("	\"gameproject/server/cacheMgr\"\n")...)
 	content = append(content, []byte("	\"gameproject/server/dbProto\"\n")...)
+	content = append(content, []byte("	\"gameproject/server/lockMgr\"\n")...)
+	content = append(content, []byte("	\"gameproject/server/transMgr\"\n")...)
 	content = append(content, []byte("	\"log\"\n")...)
 	switch keyType {
 	case "uint64":
@@ -77,24 +79,30 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 
 	switch keyType {
 	case "string":
-		content = append(content, []byte("func New"+name+"(k string) *"+name+" {\n")...)
-		content = append(content, []byte("	ret := new("+name+")\n")...)
-		content = append(content, []byte("	ret.k = \""+name+"_\" + k\n")...)
-		content = append(content, []byte("	return ret\n")...)
+		content = append(content, []byte("func New"+name+"(t *transMgr.Trans, k string) *"+name+" {\n")...)
+		content = append(content, []byte("	r := new("+name+")\n")...)
+		content = append(content, []byte("	r.k = \""+name+"_\" + k\n")...)
+		content = append(content, []byte("	if t != nil {\n")...)
+		content = append(content, []byte("		t.Save(r)\n")...)
+		content = append(content, []byte("	}\n")...)
+		content = append(content, []byte("	return r\n")...)
 		content = append(content, []byte("}\n")...)
 		content = append(content, []byte("\n")...)
-		content = append(content, []byte("func Get"+name+"(k string) *"+name+" {\n")...)
+		content = append(content, []byte("func Get"+name+"(t *transMgr.Trans, k string) *"+name+" {\n")...)
 		content = append(content, []byte("	if k == \"\" {\n")...)
 		content = append(content, []byte("		return nil\n")...)
 		content = append(content, []byte("	}\n")...)
 	case "uint64":
-		content = append(content, []byte("func New"+name+"(k uint64) *"+name+" {\n")...)
-		content = append(content, []byte("	ret := new("+name+")\n")...)
-		content = append(content, []byte("	ret.k = \""+name+"_\" + strconv.FormatUint(k,10)\n")...)
-		content = append(content, []byte("	return ret\n")...)
+		content = append(content, []byte("func New"+name+"(t *transMgr.Trans, k uint64) *"+name+" {\n")...)
+		content = append(content, []byte("	r := new("+name+")\n")...)
+		content = append(content, []byte("	r.k = \""+name+"_\" + strconv.FormatUint(k,10)\n")...)
+		content = append(content, []byte("	if t != nil {\n")...)
+		content = append(content, []byte("		t.Save(r)\n")...)
+		content = append(content, []byte("	}\n")...)
+		content = append(content, []byte("	return r\n")...)
 		content = append(content, []byte("}\n")...)
 		content = append(content, []byte("\n")...)
-		content = append(content, []byte("func Get"+name+"(uk uint64) *"+name+" {\n")...)
+		content = append(content, []byte("func Get"+name+"(t *transMgr.Trans, uk uint64) *"+name+" {\n")...)
 		content = append(content, []byte("	if uk == 0 {\n")...)
 		content = append(content, []byte("		return nil\n")...)
 		content = append(content, []byte("	}\n")...)
@@ -103,6 +111,7 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 		log.Panic("Unkown Key Type table:", name)
 	}
 
+	content = append(content, []byte("	t.Lock(\""+name+"_\" + k)\n")...)
 	content = append(content, []byte("	v := cacheMgr.GetKV(\""+name+"_\" + k)\n")...)
 	content = append(content, []byte("	if v == \"\" {\n")...)
 	content = append(content, []byte("		return nil\n")...)
@@ -111,22 +120,66 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 	content = append(content, []byte("	oct := common.NewOctets([]byte(v))\n")...)
 	content = append(content, []byte("	size := oct.UnmarshalUint32()\n")...)
 	content = append(content, []byte("	if size != oct.Remain() {\n")...)
-	content = append(content, []byte("		log.Panic(\"table."+name+" Data Len Error:\", k, \",\", size, \",\", len(v))\n")...)
+	content = append(content, []byte("		log.Panic(\"get table."+name+" Data Len Error:\", k, \",\", size, \",\", len(v))\n")...)
 	content = append(content, []byte("		return nil\n")...)
 	content = append(content, []byte("	}\n")...)
 	content = append(content, []byte("	data := oct.UnmarshalBytesOnly(size)\n")...)
 	switch keyType {
 	case "string":
-		content = append(content, []byte("	t := New"+name+"(k)\n")...)
+		content = append(content, []byte("	r := New"+name+"(t, k)\n")...)
 	case "uint64":
-		content = append(content, []byte("	t := New"+name+"(uk)\n")...)
+		content = append(content, []byte("	r := New"+name+"(t, uk)\n")...)
 	}
-	content = append(content, []byte("	err := proto.Unmarshal(data, &t."+name+")\n")...)
+	content = append(content, []byte("	err := proto.Unmarshal(data, &r."+name+")\n")...)
 	content = append(content, []byte("	if err != nil {\n")...)
-	content = append(content, []byte("		log.Panic(\"DB Data Unmarshal Error:\", t.k)\n")...)
+	content = append(content, []byte("		log.Panic(\"get DB Data Unmarshal Error:\", r.k)\n")...)
 	content = append(content, []byte("		return nil\n")...)
 	content = append(content, []byte("	}\n")...)
-	content = append(content, []byte("	return t\n")...)
+	content = append(content, []byte("	return r\n")...)
+	content = append(content, []byte("}\n")...)
+	content = append(content, []byte("\n")...)
+	switch keyType {
+	case "string":
+		content = append(content, []byte("func Select"+name+"(k string) *"+name+" {\n")...)
+		content = append(content, []byte("	if k == \"\" {\n")...)
+		content = append(content, []byte("		return nil\n")...)
+		content = append(content, []byte("	}\n")...)
+	case "uint64":
+		content = append(content, []byte("func Select"+name+"(uk uint64) *"+name+" {\n")...)
+		content = append(content, []byte("	if uk == 0 {\n")...)
+		content = append(content, []byte("		return nil\n")...)
+		content = append(content, []byte("	}\n")...)
+		content = append(content, []byte("	k := strconv.FormatUint(uk,10)\n")...)
+	default:
+		log.Panic("Unkown Key Type table:", name)
+	}
+
+	content = append(content, []byte("	lockMgr.Lock(\""+name+"_\" + k)\n")...)
+	content = append(content, []byte("	defer lockMgr.Unlock(\""+name+"_\" + k)\n")...)
+	content = append(content, []byte("	v := cacheMgr.GetKV(\""+name+"_\" + k)\n")...)
+	content = append(content, []byte("	if v == \"\" {\n")...)
+	content = append(content, []byte("		return nil\n")...)
+	content = append(content, []byte("	}\n")...)
+	content = append(content, []byte("	\n")...)
+	content = append(content, []byte("	oct := common.NewOctets([]byte(v))\n")...)
+	content = append(content, []byte("	size := oct.UnmarshalUint32()\n")...)
+	content = append(content, []byte("	if size != oct.Remain() {\n")...)
+	content = append(content, []byte("		log.Panic(\"select table."+name+" Data Len Error:\", k, \",\", size, \",\", len(v))\n")...)
+	content = append(content, []byte("		return nil\n")...)
+	content = append(content, []byte("	}\n")...)
+	content = append(content, []byte("	data := oct.UnmarshalBytesOnly(size)\n")...)
+	switch keyType {
+	case "string":
+		content = append(content, []byte("	r := New"+name+"(nil, k)\n")...)
+	case "uint64":
+		content = append(content, []byte("	r := New"+name+"(nil, uk)\n")...)
+	}
+	content = append(content, []byte("	err := proto.Unmarshal(data, &r."+name+")\n")...)
+	content = append(content, []byte("	if err != nil {\n")...)
+	content = append(content, []byte("		log.Panic(\"select DB Data Unmarshal Error:\", r.k)\n")...)
+	content = append(content, []byte("		return nil\n")...)
+	content = append(content, []byte("	}\n")...)
+	content = append(content, []byte("	return r\n")...)
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("func (this *"+name+") Save() error {\n")...)

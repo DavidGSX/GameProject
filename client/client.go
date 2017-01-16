@@ -16,7 +16,7 @@ func main() {
 		go Robot("star"+strconv.Itoa(c)+"$apps", strconv.Itoa(c))
 	}
 
-	<-time.After(3e10) // 30秒后退出
+	<-time.After(35e9) // 35秒后退出
 	log.Println("all finish")
 }
 

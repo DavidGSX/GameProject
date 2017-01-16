@@ -4,6 +4,8 @@ import (
 	"gameproject/common"
 	"gameproject/server/cacheMgr"
 	"gameproject/server/dbProto"
+	"gameproject/server/lockMgr"
+	"gameproject/server/transMgr"
 	"log"
 
 	"github.com/golang/protobuf/proto"
@@ -18,16 +20,20 @@ func (this *Name) IsSave() bool {
 	return true
 }
 
-func NewName(k string) *Name {
-	ret := new(Name)
-	ret.k = "Name_" + k
-	return ret
+func NewName(t *transMgr.Trans, k string) *Name {
+	r := new(Name)
+	r.k = "Name_" + k
+	if t != nil {
+		t.Save(r)
+	}
+	return r
 }
 
-func GetName(k string) *Name {
+func GetName(t *transMgr.Trans, k string) *Name {
 	if k == "" {
 		return nil
 	}
+	t.Lock("Name_" + k)
 	v := cacheMgr.GetKV("Name_" + k)
 	if v == "" {
 		return nil
@@ -36,17 +42,44 @@ func GetName(k string) *Name {
 	oct := common.NewOctets([]byte(v))
 	size := oct.UnmarshalUint32()
 	if size != oct.Remain() {
-		log.Panic("table.Name Data Len Error:", k, ",", size, ",", len(v))
+		log.Panic("get table.Name Data Len Error:", k, ",", size, ",", len(v))
 		return nil
 	}
 	data := oct.UnmarshalBytesOnly(size)
-	t := NewName(k)
-	err := proto.Unmarshal(data, &t.Name)
+	r := NewName(t, k)
+	err := proto.Unmarshal(data, &r.Name)
 	if err != nil {
-		log.Panic("DB Data Unmarshal Error:", t.k)
+		log.Panic("get DB Data Unmarshal Error:", r.k)
 		return nil
 	}
-	return t
+	return r
+}
+
+func SelectName(k string) *Name {
+	if k == "" {
+		return nil
+	}
+	lockMgr.Lock("Name_" + k)
+	defer lockMgr.Unlock("Name_" + k)
+	v := cacheMgr.GetKV("Name_" + k)
+	if v == "" {
+		return nil
+	}
+	
+	oct := common.NewOctets([]byte(v))
+	size := oct.UnmarshalUint32()
+	if size != oct.Remain() {
+		log.Panic("select table.Name Data Len Error:", k, ",", size, ",", len(v))
+		return nil
+	}
+	data := oct.UnmarshalBytesOnly(size)
+	r := NewName(nil, k)
+	err := proto.Unmarshal(data, &r.Name)
+	if err != nil {
+		log.Panic("select DB Data Unmarshal Error:", r.k)
+		return nil
+	}
+	return r
 }
 
 func (this *Name) Save() error {

@@ -3,27 +3,29 @@ package message
 import (
 	"gameproject/common"
 	"gameproject/global/protocol"
+	"gameproject/server/transMgr"
 	"log"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type CUserLoginProcess struct {
-	CUserLogin
+	msg   *CUserLogin
+	trans *transMgr.Trans
 }
 
-func (this *CUserLoginProcess) Process() {
+func (this *CUserLoginProcess) Process() bool {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println("CUserLoginProcess Error:", err)
 		}
 	}()
 
-	userId := this.UserId
-	token := this.Token
+	userId := this.msg.UserId
+	token := this.msg.Token
 
 	log.Println("UserId:", userId, " Token:", token)
-	this.Getl().SetUserId(userId)
+	this.msg.Getl().SetUserId(userId)
 
 	send := &protocol.SGUserAuth{}
 	send.UserId = userId
@@ -31,11 +33,12 @@ func (this *CUserLoginProcess) Process() {
 	data, err := proto.Marshal(send)
 	if err != nil {
 		log.Println("CUserLoginProcess Marshal SGUserAuth error:", err)
-		return
+		return false
 	}
 	oct := &common.Octets{}
 	oct.MarshalUint32(uint32(len(data)))
 	oct.MarshalUint32(2)
 	oct.MarshalBytesOnly(data)
-	this.Getg().Send(oct.GetBuf())
+	this.msg.Getg().Send(oct.GetBuf())
+	return true
 }

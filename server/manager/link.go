@@ -3,6 +3,7 @@ package manager
 import (
 	"gameproject/common"
 	"gameproject/server/message"
+	"gameproject/server/transMgr"
 	"log"
 	"net"
 	"sync"
@@ -112,7 +113,6 @@ func (this *Link) OnReceive() {
 		if msgType != 1001 && (this.authored == false || len(this.userId) == 0) {
 			log.Panic("Link is not authored, Message Type:", msgType)
 		}
-
 		msg := message.GetMsg(int(msgType))
 		if msg == nil {
 			log.Panic("Unknow Protocol Type:", msgType)
@@ -125,7 +125,7 @@ func (this *Link) OnReceive() {
 		msg.Setr(this.roleId)
 		msg.Setl(this)
 		msg.Setg(GetGlobalConn())
-		msg.Process()
+		transMgr.NewTrans().Process(msg)
 
 		this.recvBuf = this.recvBuf[oct.Pos():]
 	}

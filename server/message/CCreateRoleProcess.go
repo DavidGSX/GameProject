@@ -5,22 +5,24 @@ import (
 	"gameproject/server/msgProto"
 	"gameproject/server/rpcMgr"
 	"gameproject/server/table"
+	"gameproject/server/transMgr"
 	"log"
 	"time"
 )
 
 type CCreateRoleProcess struct {
-	CCreateRole
+	msg   *CCreateRole
+	trans *transMgr.Trans
 }
 
-func (this *CCreateRoleProcess) Process() {
+func (this *CCreateRoleProcess) Process() bool {
 	sendInfo := &SCreateRole{}
 	var rId uint64
-	if rpcMgr.NameExist(this.Name) {
+	if rpcMgr.NameExist(this.msg.Name) {
 		sendInfo.Res = msgProto.SCreateRole_NAME_DUPLICATED
 	} else {
 		rId = cacheMgr.GetNextRoleId()
-		rpcMgr.NameInsert(this.Name)
+		rpcMgr.NameInsert(this.msg.Name)
 	}
 
 	/*
@@ -37,37 +39,36 @@ func (this *CCreateRoleProcess) Process() {
 		}
 	*/
 
-	p := table.GetProperty(rId)
+	p := table.GetProperty(this.trans, rId)
 	if p != nil {
 		log.Panic("CCreateRoleProcess Role Id Duplicate rId:", rId)
 	}
-	p = table.NewProperty(rId)
-	p.UserId = this.Getl().GetUserId()
-	p.RoleName = this.Name
+	p = table.NewProperty(this.trans, rId)
+	p.UserId = this.msg.Getl().GetUserId()
+	p.RoleName = this.msg.Name
 	p.CreateTime = uint64(time.Now().Unix())
-	p.School = this.School
-	p.Sex = this.Sex
+	p.School = this.msg.School
+	p.Sex = this.msg.Sex
 	p.Level = 1
-	p.Save()
 
-	u := table.GetUser(this.Getl().GetUserId())
+	u := table.GetUser(this.trans, this.msg.Getl().GetUserId())
 	if u == nil {
-		u = table.NewUser(this.Getl().GetUserId())
+		u = table.NewUser(this.trans, this.msg.Getl().GetUserId())
 	}
 	u.RoleIdList = append(u.RoleIdList, rId)
 	u.LastLoginRoleId = rId
 	u.CreateTime = uint64(time.Now().Unix())
-	u.Save()
 
 	sendInfo.Res = msgProto.SCreateRole_SUCCESS
 	sendInfo.Info = &msgProto.SRoleList_RoleInfo{}
 	sendInfo.Info.RoleId = rId
-	sendInfo.Info.RoleName = this.Name
+	sendInfo.Info.RoleName = this.msg.Name
 	sendInfo.Info.Level = 1
-	sendInfo.Info.School = this.School
+	sendInfo.Info.School = this.msg.School
 	sendInfo.Info.ShowFashion = true
-	err := this.Send(sendInfo)
+	err := this.msg.Send(sendInfo)
 	if err != nil {
 		log.Panic("CCreateRoleProcess Send SCreateRole error:", err)
 	}
+	return true
 }

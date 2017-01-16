@@ -1,6 +1,8 @@
 package message
 
 import (
+	"gameproject/server/transMgr"
+
 	"github.com/golang/protobuf/proto"
 )
 
@@ -17,7 +19,7 @@ type MsgInfo interface {
 	Getg() ISend
 	Unmarshal(data []byte) error
 	Send(MsgInfo) error
-	Process()
+	Process(t *transMgr.Trans) bool
 }
 
 type ISend interface {
