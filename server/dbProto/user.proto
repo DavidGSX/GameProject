@@ -2,12 +2,6 @@ syntax = "proto3";
 
 package dbProto;
 
-message Name {
-	string userId = 1;
-	uint64 roleId = 2;
-	uint64 createTime = 3;
-}
-
 message User {
 	repeated uint64 roleIdList = 1;
 	uint64 lastLoginRoleId = 2;

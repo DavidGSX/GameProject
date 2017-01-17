@@ -23,21 +23,8 @@ func (this *CCreateRoleProcess) Process() bool {
 	} else {
 		rId = cacheMgr.GetNextRoleId()
 		rpcMgr.NameInsert(this.msg.Name)
+		sendInfo.Res = msgProto.SCreateRole_SUCCESS
 	}
-
-	/*
-		t := table.GetName(this.Name)
-		if t != nil {
-			sendInfo.Res = msgProto.SCreateRole_NAME_DUPLICATED
-		} else {
-			t = table.NewName(this.Name)
-			t.UserId = this.Getl().GetUserId()
-			rId = cacheMgr.GetNextRoleId()
-			t.RoleId = rId
-			t.CreateTime = uint64(time.Now().Unix())
-			t.Save()
-		}
-	*/
 
 	p := table.GetProperty(this.trans, rId)
 	if p != nil {
@@ -59,7 +46,6 @@ func (this *CCreateRoleProcess) Process() bool {
 	u.LastLoginRoleId = rId
 	u.CreateTime = uint64(time.Now().Unix())
 
-	sendInfo.Res = msgProto.SCreateRole_SUCCESS
 	sendInfo.Info = &msgProto.SRoleList_RoleInfo{}
 	sendInfo.Info.RoleId = rId
 	sendInfo.Info.RoleName = this.msg.Name

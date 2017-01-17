@@ -1,11 +1,6 @@
 {
 	"TableInfos" : [
 		{
-			"TableName"	: "Name",
-			"KeyType"	: "string",
-			"IsSave" 	: true
-		},
-		{
 			"TableName"	: "User",
 			"KeyType"	: "string",
 			"IsSave" 	: true
