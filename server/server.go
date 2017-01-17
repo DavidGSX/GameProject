@@ -3,6 +3,7 @@ package main
 import (
 	"gameproject/server/cacheMgr"
 	"gameproject/server/config"
+	"gameproject/server/jmxMgr"
 	"gameproject/server/lockMgr"
 	"gameproject/server/manager"
 	"gameproject/server/message"
@@ -30,7 +31,7 @@ func main() {
 
 	go manager.LinkMgrInit(cfg)
 	go manager.GlobalMgrInit(cfg)
-	go manager.JMXInit(cfg, &wg)
+	go jmxMgr.JMXInit(cfg, &wg)
 
 	wg.Add(1)
 	wg.Wait()

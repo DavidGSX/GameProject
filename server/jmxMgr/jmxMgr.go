@@ -1,4 +1,4 @@
-package manager
+package jmxMgr
 
 import (
 	"gameproject/server/config"
