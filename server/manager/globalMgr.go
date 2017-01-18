@@ -50,7 +50,9 @@ func GlobalMgrInit(cfg *config.ServerConfig) {
 	port := cfg.GlobalConfig.GlobalPort
 	conn, err := net.Dial("tcp", ip+":"+strconv.Itoa(int(port)))
 	if err != nil {
-		log.Fatal("Connect Global Error:", err)
+		log.Println("Connect Global Error:", err)
+		go ReConnectGlobal()
+		return
 	}
 	log.Println("Connect Global Success ", ip, port)
 

@@ -12,19 +12,21 @@ import (
 )
 
 func main() {
-	for c := 100; c < 200; c++ {
-		go Robot("star"+strconv.Itoa(c)+"$apps", strconv.Itoa(c))
+	ch := make(chan int, 100)
+	for c := 100000; c < 200000; c++ {
+		ch <- c
+		go Robot(ch, "star"+strconv.Itoa(c)+"$apps", strconv.Itoa(c))
 	}
-
-	<-time.After(3e10) // 30秒后退出
+	//<-time.After(3e10) // 30秒后退出
 	log.Println("all finish")
 }
 
-func Robot(userId, token string) {
+func Robot(ch chan int, userId, token string) {
 	conn, err := net.Dial("tcp", "127.0.0.1:29000")
 	if err != nil {
 		log.Panic("connect server error!")
 	}
+	defer conn.Close()
 
 	if UserLogin(conn, userId, token) == true {
 		roleId := GetRoleId(conn, userId)
@@ -37,7 +39,8 @@ func Robot(userId, token string) {
 		log.Println("UserId:", userId, " UserLogin Failed!")
 	}
 
-	<-time.After(1e10) // 10秒后退出
+	<-time.After(1e7) // 10毫秒后退出
+	log.Println("Current Process ------>", <-ch)
 }
 
 func ConnSend(conn net.Conn, msgType uint32, msg proto.Message) {
@@ -122,7 +125,7 @@ func GetRoleId(conn net.Conn, userId string) (roleId uint64) {
 }
 
 func AddMoney(conn net.Conn, roleId uint64, num uint32) {
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 		sendInfo := &msgProto.CAddMoney{}
 		sendInfo.RoleId = roleId
 		sendInfo.Num = num

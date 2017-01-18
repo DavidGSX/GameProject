@@ -73,7 +73,7 @@ func Unlock(names ...string) {
 	//log.Print("unlock", names)
 }
 
-// 避免死锁，每10秒钟清理下超过10秒钟的锁
+// 为了打断死锁，每10秒钟清理下超过10秒钟的锁
 func cleanLockTicker() {
 	ticker := time.Tick(10 * time.Second)
 	for now := range ticker {

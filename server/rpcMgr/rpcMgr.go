@@ -26,6 +26,7 @@ func NameExist(name string) (ret bool) {
 	if err != nil {
 		log.Panic("NameExist DialHTTP", err)
 	}
+	defer client.Close()
 
 	err = client.Call("UniqName.Exist", &name, &ret)
 	if err != nil {
@@ -39,6 +40,7 @@ func NameInsert(name string) {
 	if err != nil {
 		log.Panic("NameInsert DialHTTP", err)
 	}
+	defer client.Close()
 
 	var ret bool
 	err = client.Call("UniqName.Insert", &name, &ret)
@@ -52,6 +54,7 @@ func NameDelete(name string) {
 	if err != nil {
 		log.Panic("NameDelete DialHTTP", err)
 	}
+	defer client.Close()
 
 	var ret bool
 	err = client.Call("UniqName.Delete", &name, &ret)

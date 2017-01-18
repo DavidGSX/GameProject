@@ -24,7 +24,7 @@ func (this *CUserLoginProcess) Process() bool {
 	userId := this.msg.UserId
 	token := this.msg.Token
 
-	log.Println("UserId:", userId, " Token:", token)
+	//log.Println("UserId:", userId, " Token:", token)
 	this.msg.Getl().SetUserId(userId)
 
 	send := &protocol.SGUserAuth{}

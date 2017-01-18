@@ -63,9 +63,9 @@ func SetKV(k, v string) {
 	dbCacheMap[k] = info
 }
 
-// 避免缓存过大，每10分钟清理下超过1小时的缓存，清理时间不能超过10ms
+// 为了避免缓存过大，每1分钟清理下超过30分钟的缓存，清理时间不能超过20ms
 func cleanCacheTicker() {
-	ticker := time.Tick(10 * time.Minute)
+	ticker := time.Tick(1 * time.Minute)
 	for now := range ticker {
 		cleanCache(now)
 	}
@@ -77,11 +77,11 @@ func cleanCache(now time.Time) {
 
 	count := 0
 	for k, v := range dbCacheMap {
-		if time.Since(v.t) > 60*time.Minute {
+		if time.Since(v.t) > 30*time.Minute {
 			delete(dbCacheMap, k)
 			count++
 		}
-		if time.Since(now) > 10*time.Millisecond {
+		if time.Since(now) > 20*time.Millisecond {
 			break
 		}
 	}
