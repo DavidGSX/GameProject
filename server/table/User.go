@@ -33,8 +33,9 @@ func GetUser(t *transMgr.Trans, k string) *User {
 	if k == "" {
 		return nil
 	}
-	t.Lock("User_" + k)
-	v := cacheMgr.GetKV("User_" + k)
+	key := "User_" + k
+	t.Lock(key)
+	v := cacheMgr.GetKV(key)
 	if v == "" {
 		return nil
 	}
@@ -42,7 +43,7 @@ func GetUser(t *transMgr.Trans, k string) *User {
 	oct := common.NewOctets([]byte(v))
 	size := oct.UnmarshalUint32()
 	if size != oct.Remain() {
-		log.Panic("get table.User Data Len Error:", k, ",", size, ",", len(v))
+		log.Panic("get table.User Data Len Error:", key, ",", size, ",", len(v))
 		return nil
 	}
 	data := oct.UnmarshalBytesOnly(size)
@@ -59,9 +60,10 @@ func SelectUser(k string) *User {
 	if k == "" {
 		return nil
 	}
-	lockMgr.Lock("User_" + k)
-	defer lockMgr.Unlock("User_" + k)
-	v := cacheMgr.GetKV("User_" + k)
+	key := "User_" + k
+	lockMgr.Lock(key)
+	defer lockMgr.Unlock(key)
+	v := cacheMgr.GetKV(key)
 	if v == "" {
 		return nil
 	}
@@ -69,7 +71,7 @@ func SelectUser(k string) *User {
 	oct := common.NewOctets([]byte(v))
 	size := oct.UnmarshalUint32()
 	if size != oct.Remain() {
-		log.Panic("select table.User Data Len Error:", k, ",", size, ",", len(v))
+		log.Panic("select table.User Data Len Error:", key, ",", size, ",", len(v))
 		return nil
 	}
 	data := oct.UnmarshalBytesOnly(size)

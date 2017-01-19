@@ -84,7 +84,7 @@ func (this *Link) Process() {
 }
 
 func (this *Link) OnReceive() {
-	reader := make([]byte, 16384)
+	reader := make([]byte, 1024)
 	n, err := this.conn.Read(reader)
 	if err != nil {
 		// 超时不处理，继续执行
@@ -131,7 +131,7 @@ func (this *Link) OnReceive() {
 	}
 
 	// 缓冲区大于100K，断开客户端连接
-	if len(this.recvBuf) > 1e5 {
+	if len(this.recvBuf) > 100*1024 {
 		log.Panic("Receive Buffer too Big!")
 	}
 }

@@ -8,6 +8,9 @@ import (
 	"gameproject/server/manager"
 	"gameproject/server/message"
 	"gameproject/server/rpcMgr"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"sync"
 	"time"
 )
@@ -15,6 +18,14 @@ import (
 var wg sync.WaitGroup
 
 func main() {
+
+	// 服务器性能分析
+	// 分析CPU占用 go tool pprof http://localhost:6060/debug/pprof/profile
+	// 分析内存占用 go tool pprof http://localhost:6060/debug/pprof/heap
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	// 服务器配置初始化
 	cfg := config.GetConfig()
 	cfg.Show()

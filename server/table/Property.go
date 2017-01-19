@@ -23,7 +23,7 @@ func (this *Property) IsSave() bool {
 
 func NewProperty(t *transMgr.Trans, k uint64) *Property {
 	r := new(Property)
-	r.k = "Property_" + strconv.FormatUint(k,10)
+	r.k = "Property_" + strconv.FormatUint(k, 10)
 	if t != nil {
 		t.Save(r)
 	}
@@ -34,9 +34,9 @@ func GetProperty(t *transMgr.Trans, uk uint64) *Property {
 	if uk == 0 {
 		return nil
 	}
-	k := strconv.FormatUint(uk,10)
-	t.Lock("Property_" + k)
-	v := cacheMgr.GetKV("Property_" + k)
+	key := "Property_" + strconv.FormatUint(uk, 10)
+	t.Lock(key)
+	v := cacheMgr.GetKV(key)
 	if v == "" {
 		return nil
 	}
@@ -44,7 +44,7 @@ func GetProperty(t *transMgr.Trans, uk uint64) *Property {
 	oct := common.NewOctets([]byte(v))
 	size := oct.UnmarshalUint32()
 	if size != oct.Remain() {
-		log.Panic("get table.Property Data Len Error:", k, ",", size, ",", len(v))
+		log.Panic("get table.Property Data Len Error:", key, ",", size, ",", len(v))
 		return nil
 	}
 	data := oct.UnmarshalBytesOnly(size)
@@ -61,10 +61,10 @@ func SelectProperty(uk uint64) *Property {
 	if uk == 0 {
 		return nil
 	}
-	k := strconv.FormatUint(uk,10)
-	lockMgr.Lock("Property_" + k)
-	defer lockMgr.Unlock("Property_" + k)
-	v := cacheMgr.GetKV("Property_" + k)
+	key := "Property_" + strconv.FormatUint(uk, 10)
+	lockMgr.Lock(key)
+	defer lockMgr.Unlock(key)
+	v := cacheMgr.GetKV(key)
 	if v == "" {
 		return nil
 	}
@@ -72,7 +72,7 @@ func SelectProperty(uk uint64) *Property {
 	oct := common.NewOctets([]byte(v))
 	size := oct.UnmarshalUint32()
 	if size != oct.Remain() {
-		log.Panic("select table.Property Data Len Error:", k, ",", size, ",", len(v))
+		log.Panic("select table.Property Data Len Error:", key, ",", size, ",", len(v))
 		return nil
 	}
 	data := oct.UnmarshalBytesOnly(size)

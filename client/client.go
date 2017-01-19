@@ -13,7 +13,7 @@ import (
 
 func main() {
 	ch := make(chan int, 100)
-	for c := 100000; c < 200000; c++ {
+	for c := 1000000; c < 1e8; c++ {
 		ch <- c
 		go Robot(ch, "star"+strconv.Itoa(c)+"$apps", strconv.Itoa(c))
 	}
@@ -39,7 +39,7 @@ func Robot(ch chan int, userId, token string) {
 		log.Println("UserId:", userId, " UserLogin Failed!")
 	}
 
-	<-time.After(1e7) // 10毫秒后退出
+	<-time.After(1e6) // 1毫秒后退出
 	log.Println("Current Process ------>", <-ch)
 }
 
