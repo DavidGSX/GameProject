@@ -67,7 +67,6 @@ func handleJMX(conn net.Conn) {
 					log.Println(cmd + " failed!")
 					conn.Write([]byte(cmd + " failed!\n"))
 				}
-			case "q":
 			case "quit":
 				log.Panic("JMX Quit")
 			default:
