@@ -8,8 +8,8 @@ import (
 )
 
 func GetUniqIdByTableName(t string) (r uint64) {
-	lockMgr.Lock("SYS_" + t)
-	defer lockMgr.Unlock("SYS_" + t)
+	lockMgr.Lock(t)
+	defer lockMgr.Unlock(t)
 
 	v := GetKV(t)
 	if v == "" {
@@ -26,5 +26,5 @@ func GetUniqIdByTableName(t string) (r uint64) {
 }
 
 func GetNextRoleId() uint64 {
-	return GetUniqIdByTableName("ROLEID")
+	return GetUniqIdByTableName("SYS_ROLEID")
 }

@@ -2,6 +2,7 @@ package cacheMgr
 
 import (
 	"log"
+	"strings"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -31,10 +32,24 @@ func Session() *mgo.Session {
 	return session.Clone()
 }
 
-func mongoDBGetKV(t, k string) string {
+func getTK(key string) (t, k string) {
+	tk := strings.Split(key, "_")
+	if len(tk) < 2 {
+		log.Panic("key invalid ", key)
+	}
+	t = tk[0]
+	k = tk[1]
+	for i := 2; i < len(tk); i++ {
+		k = k + "_" + tk[i]
+	}
+	return t, k
+}
+
+func mongoDBGetKV(key string) string {
 	s := Session()
 	defer s.Close()
 
+	t, k := getTK(key)
 	result := bson.M{}
 	err := s.DB(dbName).C(t).Find(bson.M{"_id": k}).One(&result)
 	if err != nil {
@@ -49,23 +64,26 @@ func mongoDBGetKV(t, k string) string {
 	}
 }
 
-func mongoDBInsertKV(t, k, v string) {
+func mongoDBInsertKV(key, v string) {
 	s := Session()
 	defer s.Close()
 
+	t, k := getTK(key)
 	s.DB(dbName).C(t).Insert(bson.M{"_id": k, "v": v})
 }
 
-func mongoDBUpdateKV(t, k, v string) {
+func mongoDBUpdateKV(key, v string) {
 	s := Session()
 	defer s.Close()
 
+	t, k := getTK(key)
 	s.DB(dbName).C(t).Update(bson.M{"_id": k}, bson.M{"_id": k, "v": v})
 }
 
-func mongoDBDeleteKV(t, k string) {
+func mongoDBDeleteKV(key string) {
 	s := Session()
 	defer s.Close()
 
+	t, k := getTK(key)
 	s.DB(dbName).C(t).Remove(bson.M{"_id": k})
 }
