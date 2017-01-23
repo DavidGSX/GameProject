@@ -12,7 +12,7 @@ import (
 type UniqName int
 
 func (this *UniqName) Exist(args *string, replay *bool) error {
-	ret := DBGetKV("UniqName_" + *args)
+	ret := mongoDBGetKV("UniqName", *args) //ssdbGetKV("UniqName_" + *args)
 	if ret == "true" {
 		*replay = true
 	} else {
@@ -22,13 +22,15 @@ func (this *UniqName) Exist(args *string, replay *bool) error {
 }
 
 func (this *UniqName) Insert(args *string, replay *bool) error {
-	DBSetKV("UniqName_"+*args, "true")
+	//ssdbSetKV("UniqName_"+*args, "true")
+	mongoDBInsertKV("UniqName", *args, "true")
 	*replay = true
 	return nil
 }
 
 func (this *UniqName) Delete(args *string, replay *bool) error {
-	DBDelKV("UniqName_" + *args)
+	//ssdbDelKV("UniqName_" + *args)
+	mongoDBDeleteKV("UniqName", *args)
 	*replay = true
 	return nil
 }

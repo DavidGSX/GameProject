@@ -20,7 +20,8 @@ func CacheInit(cfg *config.ServerConfig) {
 	defer dbCacheMapLock.Unlock()
 
 	dbCacheMap = make(map[string]*ValueInfo)
-	dbInit(cfg)
+	//ssdbInit(cfg)
+	mongoDBInit()
 
 	go cleanCacheTicker()
 }
@@ -37,7 +38,7 @@ func GetKV(k string) string {
 	info, ok := dbCacheMap[k]
 	if ok == false {
 		info = new(ValueInfo)
-		info.v = dbGetKV(k)
+		info.v = mongoDBGetKV("t", k) //ssdbGetKV(k)
 		dbCacheMap[k] = info
 	}
 	info.t = time.Now()
@@ -52,11 +53,16 @@ func SetKV(k, v string) {
 			log.Println("Cache SetKV ", err, " Key:", k, " Value:", v)
 		}
 	}()
-	dbSetKV(k, v)
+	//ssdbSetKV(k, v)
 
 	info, ok := dbCacheMap[k]
 	if ok == false {
 		info = new(ValueInfo)
+	}
+	if info.v == "" {
+		mongoDBInsertKV("t", k, v)
+	} else {
+		mongoDBUpdateKV("t", k, v)
 	}
 	info.v = v
 	info.t = time.Now()

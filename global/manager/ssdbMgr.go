@@ -9,7 +9,7 @@ import (
 
 var dbPool *gossdb.Connectors
 
-func DBInit(cfg *config.GlobalConfig) {
+func SSDBInit(cfg *config.GlobalConfig) {
 	ip := cfg.BaseConfig.DBIP
 	port := cfg.BaseConfig.DBPort
 	minPoolSize := cfg.BaseConfig.MinPoolSize
@@ -30,7 +30,7 @@ func DBInit(cfg *config.GlobalConfig) {
 	log.Println("Create DB Pool [", minPoolSize, maxPoolSize, "] Success! ")
 }
 
-func DBSetKV(k, v string) {
+func ssdbSetKV(k, v string) {
 	c, err := dbPool.NewClient()
 	if err != nil {
 		log.Panic(err)
@@ -40,7 +40,7 @@ func DBSetKV(k, v string) {
 	c.Set(k, v)
 }
 
-func DBGetKV(k string) string {
+func ssdbGetKV(k string) string {
 	c, err := dbPool.NewClient()
 	if err != nil {
 		log.Panic(err)
@@ -54,7 +54,7 @@ func DBGetKV(k string) string {
 	return v.String()
 }
 
-func DBDelKV(k string) {
+func ssdbDelKV(k string) {
 	c, err := dbPool.NewClient()
 	if err != nil {
 		log.Panic(err)

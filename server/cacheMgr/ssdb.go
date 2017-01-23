@@ -7,9 +7,9 @@ import (
 	"github.com/DavidGSX/gossdb"
 )
 
-var dbPool *gossdb.Connectors
+var ssdbPool *gossdb.Connectors
 
-func dbInit(cfg *config.ServerConfig) {
+func ssdbInit(cfg *config.ServerConfig) {
 	ip := cfg.DBConfig.DBIP
 	port := cfg.DBConfig.DBPort
 	minPoolSize := cfg.DBConfig.MinPoolSize
@@ -17,7 +17,7 @@ func dbInit(cfg *config.ServerConfig) {
 	acqIncrement := cfg.DBConfig.AcquireIncrement
 
 	var err error
-	dbPool, err = gossdb.NewPool(&gossdb.Config{
+	ssdbPool, err = gossdb.NewPool(&gossdb.Config{
 		Host:             ip,
 		Port:             int(port),
 		MinPoolSize:      int(minPoolSize),
@@ -30,9 +30,8 @@ func dbInit(cfg *config.ServerConfig) {
 	log.Println("Create DB Pool [", minPoolSize, maxPoolSize, "] Success! ")
 }
 
-func dbSetKV(k, v string) {
-
-	c, err := dbPool.NewClient()
+func ssdbSetKV(k, v string) {
+	c, err := ssdbPool.NewClient()
 	if err != nil {
 		log.Panic(err)
 	}
@@ -46,8 +45,8 @@ func dbSetKV(k, v string) {
 	c.Set(k, v)
 }
 
-func dbGetKV(k string) string {
-	c, err := dbPool.NewClient()
+func ssdbGetKV(k string) string {
+	c, err := ssdbPool.NewClient()
 	if err != nil {
 		log.Panic(err)
 	}

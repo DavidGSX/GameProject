@@ -13,7 +13,8 @@ func main() {
 	cfg := config.GetConfig()
 	cfg.Show()
 	manager.GetPlatMgr().Init(cfg)
-	manager.DBInit(cfg)
+	//manager.SSDBInit(cfg)
+	manager.MongoDBInit()
 	<-time.After(3e9) // 3秒初始化时间
 
 	go manager.InitHttpCallback(cfg)
