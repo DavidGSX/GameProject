@@ -10,7 +10,8 @@ import (
 )
 
 type Person struct {
-	Phone string
+	Name  string `bson:"_id"`
+	Phone string `bson:"p"`
 }
 
 func main() {
@@ -27,17 +28,15 @@ func main() {
 	for i := 1; i < 1e9; i++ {
 		key := strconv.Itoa(i)
 		begin := time.Now()
-		err = c.Insert(bson.M{"_id": key, "Phone": "111111"}) //(&Person{"Ale", "111111"}, &Person{"Cla", "222222222"})
+		c.Upsert(bson.M{"_id": key}, &Person{key, "111111"})
+
+		result := Person{}
+		err = c.Find(bson.M{"_id": key}).One(&result)
 		if err != nil {
 			panic(err)
 		}
-		result := bson.M{}
-		err = c.Find(bson.M{"_id": key}).One(result)
-		if err != nil {
-			panic(err)
-		}
-		if time.Since(begin) > 50*time.Millisecond {
-			fmt.Println("Process --->>", i, time.Since(begin))
+		if time.Since(begin) > 10*time.Millisecond {
+			fmt.Println("Process", i, "	Use", time.Since(begin))
 		}
 	}
 }

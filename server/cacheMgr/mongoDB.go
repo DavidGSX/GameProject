@@ -8,6 +8,11 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+type KV struct {
+	Key   string `bson:"_id"`
+	Value string `bson:"v"`
+}
+
 var (
 	session *mgo.Session
 	dbName  = "test"
@@ -50,34 +55,20 @@ func mongoDBGetKV(key string) string {
 	defer s.Close()
 
 	t, k := getTK(key)
-	result := bson.M{}
+	result := KV{}
 	err := s.DB(dbName).C(t).Find(bson.M{"_id": k}).One(&result)
 	if err != nil {
 		return string("")
 	}
-	v, ok := result["v"].(string)
-	if ok {
-		return v
-	} else {
-		log.Panic("found but nil", k, result)
-		return string("")
-	}
+	return result.Value
 }
 
-func mongoDBInsertKV(key, v string) {
+func mongoDBUpsertKV(key, v string) {
 	s := Session()
 	defer s.Close()
 
 	t, k := getTK(key)
-	s.DB(dbName).C(t).Insert(bson.M{"_id": k, "v": v})
-}
-
-func mongoDBUpdateKV(key, v string) {
-	s := Session()
-	defer s.Close()
-
-	t, k := getTK(key)
-	s.DB(dbName).C(t).Update(bson.M{"_id": k}, bson.M{"_id": k, "v": v})
+	s.DB(dbName).C(t).Upsert(bson.M{"_id": k}, KV{k, v})
 }
 
 func mongoDBDeleteKV(key string) {

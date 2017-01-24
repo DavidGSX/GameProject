@@ -38,7 +38,8 @@ func GetKV(k string) string {
 	info, ok := dbCacheMap[k]
 	if ok == false {
 		info = new(ValueInfo)
-		info.v = mongoDBGetKV(k) //ssdbGetKV(k)
+		//info.v = ssdbGetKV(k)
+		info.v = mongoDBGetKV(k)
 		dbCacheMap[k] = info
 	}
 	info.t = time.Now()
@@ -54,15 +55,11 @@ func SetKV(k, v string) {
 		}
 	}()
 	//ssdbSetKV(k, v)
+	mongoDBUpsertKV(k, v)
 
 	info, ok := dbCacheMap[k]
 	if ok == false {
 		info = new(ValueInfo)
-	}
-	if info.v == "" {
-		mongoDBInsertKV(k, v)
-	} else {
-		mongoDBUpdateKV(k, v)
 	}
 	info.v = v
 	info.t = time.Now()

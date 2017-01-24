@@ -12,7 +12,8 @@ import (
 type UniqName int
 
 func (this *UniqName) Exist(args *string, replay *bool) error {
-	ret := mongoDBGetKV("UniqName", *args) //ssdbGetKV("UniqName_" + *args)
+	//ret := ssdbGetKV("UniqName_" + *args)
+	ret := mongoDBGetKV("UniqName", *args)
 	if ret == "true" {
 		*replay = true
 	} else {
@@ -23,7 +24,7 @@ func (this *UniqName) Exist(args *string, replay *bool) error {
 
 func (this *UniqName) Insert(args *string, replay *bool) error {
 	//ssdbSetKV("UniqName_"+*args, "true")
-	mongoDBInsertKV("UniqName", *args, "true")
+	mongoDBUpsertKV("UniqName", *args, "true")
 	*replay = true
 	return nil
 }

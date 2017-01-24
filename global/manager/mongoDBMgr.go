@@ -12,6 +12,11 @@ var (
 	dbName  = "test"
 )
 
+type KV struct {
+	Key   string `bson:"_id"`
+	Value string `bson:"v"`
+}
+
 func MongoDBInit() {
 	if session == nil {
 		var err error
@@ -35,32 +40,19 @@ func mongoDBGetKV(t, k string) string {
 	s := Session()
 	defer s.Close()
 
-	result := bson.M{}
+	result := KV{}
 	err := s.DB(dbName).C(t).Find(bson.M{"_id": k}).One(&result)
 	if err != nil {
 		return string("")
 	}
-	v, ok := result["v"].(string)
-	if ok {
-		return v
-	} else {
-		log.Panic("found but nil", k, result)
-		return string("")
-	}
+	return result.Value
 }
 
-func mongoDBInsertKV(t, k, v string) {
+func mongoDBUpsertKV(t, k, v string) {
 	s := Session()
 	defer s.Close()
 
-	s.DB(dbName).C(t).Insert(bson.M{"_id": k, "v": v})
-}
-
-func mongoDBUpdateKV(t, k, v string) {
-	s := Session()
-	defer s.Close()
-
-	s.DB(dbName).C(t).Update(bson.M{"_id": k}, bson.M{"_id": k, "v": v})
+	s.DB(dbName).C(t).Upsert(bson.M{"_id": k}, KV{k, v})
 }
 
 func mongoDBDeleteKV(t, k string) {
