@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func InitHttpCallback(cfg *config.GlobalConfig) {
+func CallbackMgrInit(cfg *config.GlobalConfig) {
 	ip := cfg.BaseConfig.CallbackIP
 	port := cfg.BaseConfig.CallbackPort
 

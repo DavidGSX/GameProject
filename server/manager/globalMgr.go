@@ -46,6 +46,14 @@ func ReConnectGlobal() {
 }
 
 func GlobalMgrInit(cfg *config.ServerConfig) {
+	globalConnLock.Lock()
+	defer globalConnLock.Unlock()
+
+	if globalConn == nil {
+		globalConn = new(GlobalConn)
+	}
+	globalConn.cfg = cfg
+
 	ip := cfg.GlobalConfig.GlobalIP
 	port := cfg.GlobalConfig.GlobalPort
 	conn, err := net.Dial("tcp", ip+":"+strconv.Itoa(int(port)))
@@ -56,14 +64,6 @@ func GlobalMgrInit(cfg *config.ServerConfig) {
 	}
 	log.Println("Connect Global Success ", ip, port)
 
-	globalConnLock.Lock()
-	defer globalConnLock.Unlock()
-
-	if globalConn == nil {
-		globalConn = new(GlobalConn)
-	}
-
-	globalConn.cfg = cfg
 	globalConn.conn = conn
 	globalConn.recvBuf = make([]byte, 0)
 	globalConn.sendBuf = make([]byte, 0)

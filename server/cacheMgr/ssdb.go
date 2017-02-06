@@ -14,7 +14,7 @@ func ssdbInit(cfg *config.ServerConfig) {
 	port := cfg.DBConfig.DBPort
 	minPoolSize := cfg.DBConfig.MinPoolSize
 	maxPoolSize := cfg.DBConfig.MaxPoolSize
-	acqIncrement := cfg.DBConfig.AcquireIncrement
+	acqIncrement := cfg.DBConfig.AcqIncrement
 
 	var err error
 	ssdbPool, err = gossdb.NewPool(&gossdb.Config{

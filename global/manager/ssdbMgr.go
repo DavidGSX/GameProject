@@ -14,7 +14,7 @@ func SSDBInit(cfg *config.GlobalConfig) {
 	port := cfg.BaseConfig.DBPort
 	minPoolSize := cfg.BaseConfig.MinPoolSize
 	maxPoolSize := cfg.BaseConfig.MaxPoolSize
-	acqIncrement := cfg.BaseConfig.AcquireIncrement
+	acqIncrement := cfg.BaseConfig.AcqIncrement
 
 	var err error
 	dbPool, err = gossdb.NewPool(&gossdb.Config{

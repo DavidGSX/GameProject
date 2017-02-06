@@ -13,11 +13,11 @@ type BaseConfig struct {
 }
 
 type DBConfig struct {
-	DBIP             string // 数据库的IP
-	DBPort           uint32 // 数据库的端口
-	MinPoolSize      uint32 // 连接池最少的连接数
-	MaxPoolSize      uint32 // 连接池最大的连接数
-	AcquireIncrement uint32 // 连接池每次增加的数量
+	DBIP         string // 数据库的IP
+	DBPort       uint32 // 数据库的端口
+	MinPoolSize  uint32 // 连接池最少的连接数
+	MaxPoolSize  uint32 // 连接池最大的连接数
+	AcqIncrement uint32 // 连接池每次增加的数量
 }
 
 type JMXConfig struct {
@@ -111,7 +111,7 @@ func (this *DBConfig) Show() {
 	log.Println("DBPort:", this.DBPort)
 	log.Println("MinPoolSize:", this.MinPoolSize)
 	log.Println("MaxPoolSize:", this.MaxPoolSize)
-	log.Println("AcquireIncrement:", this.AcquireIncrement)
+	log.Println("AcqIncrement:", this.AcqIncrement)
 	log.Println()
 }
 

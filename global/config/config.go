@@ -8,19 +8,19 @@ import (
 )
 
 type BaseConfig struct {
-	JMXIP            string // JMX监听的IP
-	JMXPort          uint32 // JMX监听的端口
-	CallbackIP       string // 充值回调监听的IP
-	CallbackPort     uint32 // 充值回调监听的端口
-	AuthorizeIP      string // 与Server通信的IP
-	AuthorizePort    uint32 // 与Server通信的端口
-	RPCIP            string // RPC监听的IP
-	RPCPort          uint32 // RPC监听的端口
-	DBIP             string // 数据库的IP
-	DBPort           uint32 // 数据库的端口
-	MinPoolSize      uint32 // 连接池最少的连接数
-	MaxPoolSize      uint32 // 连接池最大的连接数
-	AcquireIncrement uint32 // 连接池每次增加的数量
+	JMXIP        string // JMX监听的IP
+	JMXPort      uint32 // JMX监听的端口
+	CallbackIP   string // 充值回调监听的IP
+	CallbackPort uint32 // 充值回调监听的端口
+	ServerIP     string // 与Server通信的IP
+	ServerPort   uint32 // 与Server通信的端口
+	RPCIP        string // RPC监听的IP
+	RPCPort      uint32 // RPC监听的端口
+	DBIP         string // 数据库的IP
+	DBPort       uint32 // 数据库的端口
+	MinPoolSize  uint32 // 连接池最少的连接数
+	MaxPoolSize  uint32 // 连接池最大的连接数
+	AcqIncrement uint32 // 连接池每次增加的数量
 }
 
 type PlatConfig struct {
@@ -92,15 +92,15 @@ func (this *BaseConfig) Show() {
 	log.Println("JMXPort:", this.JMXPort)
 	log.Println("CallbackIP:", this.CallbackIP)
 	log.Println("CallbackPort:", this.CallbackPort)
-	log.Println("AuthorizeIP:", this.AuthorizeIP)
-	log.Println("AuthorizePort:", this.AuthorizePort)
+	log.Println("ServerIP:", this.ServerIP)
+	log.Println("ServerPort:", this.ServerPort)
 	log.Println("RPCIP:", this.RPCIP)
 	log.Println("RPCPort:", this.RPCPort)
 	log.Println("DBIP:", this.DBIP)
 	log.Println("DBPort:", this.DBPort)
 	log.Println("MinPoolSize:", this.MinPoolSize)
 	log.Println("MaxPoolSize:", this.MaxPoolSize)
-	log.Println("AcquireIncrement:", this.AcquireIncrement)
+	log.Println("AcqIncrement:", this.AcqIncrement)
 	log.Println()
 }
 

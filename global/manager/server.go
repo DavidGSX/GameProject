@@ -33,7 +33,7 @@ func NewServer(c net.Conn) *Server {
 
 func (this *Server) Close() {
 	this.conn.Close()
-	GetAuthorMgr().DelServer(this.zoneId)
+	GetServerMgr().DelServer(this.zoneId)
 }
 
 func (this *Server) Process() {

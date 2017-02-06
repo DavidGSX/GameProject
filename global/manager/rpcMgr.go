@@ -36,7 +36,7 @@ func (this *UniqName) Delete(args *string, replay *bool) error {
 	return nil
 }
 
-func InitRPC(cfg *config.GlobalConfig) {
+func RPCMgrInit(cfg *config.GlobalConfig) {
 	ip := cfg.BaseConfig.RPCIP
 	port := cfg.BaseConfig.RPCPort
 

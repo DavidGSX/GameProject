@@ -73,9 +73,9 @@ func Unlock(names ...string) {
 	//log.Print("unlock", names)
 }
 
-// 为了打断死锁，每10秒钟清理下超过10秒钟的锁和超过10分钟的缓存
+// 为了打断死锁，每5秒钟清理下超过5秒钟的锁和超过15分钟的缓存
 func cleanLockTicker() {
-	ticker := time.Tick(10 * time.Second)
+	ticker := time.Tick(5 * time.Second)
 	for now := range ticker {
 		cleanLock(now)
 	}
@@ -86,12 +86,12 @@ func cleanLock(now time.Time) {
 	defer dbLockMapLock.Unlock()
 	count := 0
 	for k, v := range dbLockMap {
-		if v.b == true && time.Since(v.t) > 10*time.Second {
+		if v.b == true && time.Since(v.t) > 5*time.Second {
 			v.Unlock()
 			log.Println("Clean DeadLock ", v.s)
 		}
 		// 清理冗余的数据，避免遍历map时间过长
-		if v.b == false && time.Since(v.t) > 10*time.Minute {
+		if v.b == false && time.Since(v.t) > 15*time.Minute {
 			delete(dbLockMap, k)
 			count++
 		}
