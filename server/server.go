@@ -42,6 +42,7 @@ func main() {
 
 	go manager.LinkMgrInit(cfg)
 	go manager.GlobalMgrInit(cfg)
+	go manager.WorldMgrInit(cfg)
 	go jmxMgr.JMXInit(cfg, &wg)
 
 	wg.Add(1)

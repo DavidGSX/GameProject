@@ -35,6 +35,11 @@ type GlobalConfig struct {
 	GlobalPort uint32 // 连接Global的端口
 }
 
+type WorldConfig struct {
+	WorldIP   string // 连接World的IP
+	WorldPort uint32 // 连接World的端口
+}
+
 type RPCConfig struct {
 	RPCIP   string // 连接RPC的IP
 	RPCPort uint32 // 连接RPC的端口
@@ -46,6 +51,7 @@ type ServerConfig struct {
 	JMXConfig    JMXConfig    // JMX的配置
 	LinkConfig   LinkConfig   // Link的配置
 	GlobalConfig GlobalConfig // Global的配置
+	WorldConfig  WorldConfig  // World的配置
 	RPCConfig    RPCConfig    // RPC的配置
 }
 
@@ -142,6 +148,15 @@ func (this *GlobalConfig) Show() {
 	log.Println()
 }
 
+func (this *WorldConfig) Show() {
+	if this == nil {
+		return
+	}
+	log.Println("WorldIP:", this.WorldIP)
+	log.Println("WorldPort:", this.WorldPort)
+	log.Println()
+}
+
 func (this *RPCConfig) Show() {
 	if this == nil {
 		return
@@ -160,5 +175,6 @@ func (this *ServerConfig) Show() {
 	this.JMXConfig.Show()
 	this.LinkConfig.Show()
 	this.GlobalConfig.Show()
+	this.WorldConfig.Show()
 	this.RPCConfig.Show()
 }

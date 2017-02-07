@@ -2,14 +2,12 @@ package manager
 
 import (
 	"gameproject/common"
-	"gameproject/global/protocol"
+	"gameproject/world/message"
+	"gameproject/world/transMgr"
 	"log"
 	"net"
-	"strings"
 	"sync"
 	"time"
-
-	"github.com/golang/protobuf/proto"
 )
 
 type Server struct {
@@ -34,6 +32,18 @@ func NewServer(c net.Conn) *Server {
 func (this *Server) Close() {
 	this.conn.Close()
 	GetServerMgr().DelServer(this.zoneId)
+}
+
+func (this *Server) SetZoneId(z uint32) {
+	if this.zoneId != 0 && this.zoneId != z {
+		log.Println("SetZoneId old:", this.zoneId, " new:", z)
+	}
+	this.zoneId = z
+	GetServerMgr().AddServer(z, this)
+}
+
+func (this *Server) GetZoneId() uint32 {
+	return this.zoneId
 }
 
 func (this *Server) Process() {
@@ -94,17 +104,20 @@ func (this *Server) OnReceive() {
 		}
 		data := oct.UnmarshalBytesOnly(size)
 
-		switch msgType {
-		case 1:
-			this.OnServerStart(data)
-		case 2:
-			this.OnUserAuth(data)
-		default:
-			// 如果协议错误，就清空接受缓冲区
-			log.Println("Invalid Msg Type:", msgType)
-			this.recvBuf = make([]byte, 0)
-			return
+		if msgType != 101 && this.zoneId == 0 {
+			log.Panic("Server is not register, Message Type:", msgType)
 		}
+		msg := message.GetMsg(int(msgType))
+		if msg == nil {
+			log.Panic("Unknow Protocol Type:", msgType)
+		}
+		msg = msg.Clone()
+		err = msg.Unmarshal(data)
+		if err != nil {
+			log.Panic("Unmarshal Protocol Error:", err, " Type:", msgType)
+		}
+		msg.Sets(this)
+		transMgr.NewTrans().Process(msg)
 
 		this.recvBuf = this.recvBuf[oct.Pos():]
 	}
@@ -113,51 +126,6 @@ func (this *Server) OnReceive() {
 	if len(this.recvBuf) > 1e6 {
 		log.Println("Receive Buffer too Big, size:", len(this.recvBuf))
 	}
-}
-
-func (this *Server) OnServerStart(data []byte) {
-	serverStart := &protocol.SGServerStart{}
-	err := proto.Unmarshal(data, serverStart)
-	if err != nil {
-		log.Println("unmarshal SGServerStart error:", err)
-		return
-	}
-
-	this.zoneId = serverStart.ZoneId
-	this.plats = GetPlatMgr().GetPlatsBySetId(serverStart.Plat)
-	keys := make([]string, 0)
-	for k := range this.plats {
-		keys = append(keys, k)
-	}
-	log.Println("Server Connected zoneId:", this.zoneId, " plat:", serverStart.Plat, " plats:", keys, this.conn.RemoteAddr().String())
-}
-
-func (this *Server) OnUserAuth(data []byte) {
-	if this.zoneId == 0 || len(this.plats) == 0 {
-		log.Println("Server not Send zoneId:", this.zoneId, " plat:", this.plats, " ", this.conn.RemoteAddr().String())
-		return
-	}
-
-	author := &protocol.SGUserAuth{}
-	err := proto.Unmarshal(data, author)
-	if err != nil {
-		log.Println("unmarshal SGServerStart error:", err)
-		return
-	}
-
-	strs := strings.Split(author.UserId, "$")
-	if len(strs) != 2 {
-		log.Println("ProcessAuthor wrong userId:", author.UserId)
-		return
-	}
-
-	_, ok := this.plats[strs[1]]
-	if ok == false {
-		log.Println("ProcessAuthor wrong user plat:", strs[1])
-		return
-	}
-
-	GetPlatMgr().ProcessAuthor(this, strs[1], strs[0], author.Token)
 }
 
 func (this *Server) OnSend() {

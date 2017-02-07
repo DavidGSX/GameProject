@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package msgProto;
+
+message GS2WServerStart {
+	uint32 zoneId = 1;
+}
+
+message W2GSServerStartRes {
+}
+
+message GS2WSendInfo {
+	uint32 zoneId = 1;
+	string userId = 2;
+	uint32 type = 3;
+	string info = 4;
+}
+
+message W2GSSendInfo {
+	uint32 zoneId = 1;
+	string userId = 2;
+	uint32 type = 3;
+	string info = 4;
+}
+
+message W2GSDispatch {
+	uint32 fromZoneId = 1;
+	uint32 toZoneId = 2;
+	uint32 type = 3;
+	string info = 4;
+}
+
+message W2GSBroadcast {
+	repeated uint32 zoneIds = 1;
+	uint32 type = 2;
+	string info = 3;
+}
