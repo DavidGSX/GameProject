@@ -2,8 +2,8 @@ package table
 
 import (
 	"gameproject/common"
-	"gameproject/server/cacheMgr"
-	"gameproject/server/dbProto"
+	"gameproject/server/db/cacheMgr"
+	"gameproject/server/db/dbProto"
 	"gameproject/server/lockMgr"
 	"gameproject/server/transMgr"
 	"log"

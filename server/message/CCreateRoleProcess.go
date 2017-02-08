@@ -1,10 +1,10 @@
 package message
 
 import (
-	"gameproject/server/cacheMgr"
+	"gameproject/server/db/cacheMgr"
+	"gameproject/server/db/table"
 	"gameproject/server/msgProto"
 	"gameproject/server/rpcMgr"
-	"gameproject/server/table"
 	"gameproject/server/transMgr"
 	"log"
 	"time"

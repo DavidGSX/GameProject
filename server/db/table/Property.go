@@ -2,8 +2,8 @@ package table
 
 import (
 	"gameproject/common"
-	"gameproject/server/cacheMgr"
-	"gameproject/server/dbProto"
+	"gameproject/server/db/cacheMgr"
+	"gameproject/server/db/dbProto"
 	"gameproject/server/lockMgr"
 	"gameproject/server/transMgr"
 	"log"
@@ -30,11 +30,11 @@ func NewProperty(t *transMgr.Trans, k uint64) *Property {
 	return r
 }
 
-func GetProperty(t *transMgr.Trans, uk uint64) *Property {
-	if uk == 0 {
+func GetProperty(t *transMgr.Trans, k uint64) *Property {
+	if k == 0 {
 		return nil
 	}
-	key := "Property_" + strconv.FormatUint(uk, 10)
+	key := "Property_" + strconv.FormatUint(k, 10)
 	t.Lock(key)
 	v := cacheMgr.GetKV(key)
 	if v == "" {
@@ -48,7 +48,7 @@ func GetProperty(t *transMgr.Trans, uk uint64) *Property {
 		return nil
 	}
 	data := oct.UnmarshalBytesOnly(size)
-	r := NewProperty(t, uk)
+	r := NewProperty(t, k)
 	err := proto.Unmarshal(data, &r.Property)
 	if err != nil {
 		log.Panic("get DB Data Unmarshal Error:", r.k)
@@ -57,11 +57,11 @@ func GetProperty(t *transMgr.Trans, uk uint64) *Property {
 	return r
 }
 
-func SelectProperty(uk uint64) *Property {
-	if uk == 0 {
+func SelectProperty(k uint64) *Property {
+	if k == 0 {
 		return nil
 	}
-	key := "Property_" + strconv.FormatUint(uk, 10)
+	key := "Property_" + strconv.FormatUint(k, 10)
 	lockMgr.Lock(key)
 	defer lockMgr.Unlock(key)
 	v := cacheMgr.GetKV(key)
@@ -76,7 +76,7 @@ func SelectProperty(uk uint64) *Property {
 		return nil
 	}
 	data := oct.UnmarshalBytesOnly(size)
-	r := NewProperty(nil, uk)
+	r := NewProperty(nil, k)
 	err := proto.Unmarshal(data, &r.Property)
 	if err != nil {
 		log.Panic("select DB Data Unmarshal Error:", r.k)

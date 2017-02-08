@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gameproject/server/cacheMgr"
 	"gameproject/server/config"
+	"gameproject/server/db/cacheMgr"
 	"gameproject/server/jmxMgr"
 	"gameproject/server/lockMgr"
 	"gameproject/server/manager"

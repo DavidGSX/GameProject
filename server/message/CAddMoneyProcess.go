@@ -1,7 +1,7 @@
 package message
 
 import (
-	"gameproject/server/table"
+	"gameproject/server/db/table"
 	"gameproject/server/transMgr"
 	"log"
 )

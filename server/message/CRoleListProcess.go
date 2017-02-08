@@ -1,8 +1,8 @@
 package message
 
 import (
+	"gameproject/server/db/table"
 	"gameproject/server/msgProto"
-	"gameproject/server/table"
 	"gameproject/server/transMgr"
 	"log"
 )
