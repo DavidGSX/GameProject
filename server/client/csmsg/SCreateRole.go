@@ -1,15 +1,15 @@
-package message
+package csmsg
 
 import (
 	"gameproject/common"
-	"gameproject/server/msgProto"
+	"gameproject/server/client/csproto"
 	"gameproject/server/transMgr"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type SCreateRole struct {
-	msgProto.SCreateRole
+	csproto.SCreateRole
 	l ISend  // Link缩写
 	g ISend  // Global缩写
 	r uint64 // RoleId缩写

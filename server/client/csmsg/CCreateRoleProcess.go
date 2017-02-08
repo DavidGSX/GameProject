@@ -1,9 +1,9 @@
-package message
+package csmsg
 
 import (
+	"gameproject/server/client/csproto"
 	"gameproject/server/db/cacheMgr"
 	"gameproject/server/db/table"
-	"gameproject/server/msgProto"
 	"gameproject/server/rpcMgr"
 	"gameproject/server/transMgr"
 	"log"
@@ -25,11 +25,11 @@ func (this *CCreateRoleProcess) Process() bool {
 	sendInfo := &SCreateRole{}
 	var rId uint64
 	if rpcMgr.NameExist(this.msg.Name) {
-		sendInfo.Res = msgProto.SCreateRole_NAME_DUPLICATED
+		sendInfo.Res = csproto.SCreateRole_NAME_DUPLICATED
 	} else {
 		rId = cacheMgr.GetNextRoleId()
 		rpcMgr.NameInsert(this.msg.Name)
-		sendInfo.Res = msgProto.SCreateRole_SUCCESS
+		sendInfo.Res = csproto.SCreateRole_SUCCESS
 	}
 
 	p := table.GetProperty(this.trans, rId)
@@ -52,7 +52,7 @@ func (this *CCreateRoleProcess) Process() bool {
 	u.LastLoginRoleId = rId
 	u.CreateTime = uint64(time.Now().Unix())
 
-	sendInfo.Info = &msgProto.SRoleList_RoleInfo{}
+	sendInfo.Info = &csproto.SRoleList_RoleInfo{}
 	sendInfo.Info.RoleId = rId
 	sendInfo.Info.RoleName = this.msg.Name
 	sendInfo.Info.Level = 1

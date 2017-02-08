@@ -1,4 +1,4 @@
-package msgProto
+package csproto
 
 import (
 	"encoding/json"
@@ -56,7 +56,7 @@ func (this *MsgMgr) Gen() {
 	sort.Ints(types)
 
 	content := make([]byte, 0)
-	content = append(content, []byte("package message\n")...)
+	content = append(content, []byte("package csmsg\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("import (\n")...)
 	content = append(content, []byte("	\"gameproject/server/transMgr\"\n")...)
@@ -105,7 +105,7 @@ func (this *MsgMgr) Gen() {
 	content = append(content, []byte("	return MsgInfos[t]\n")...)
 	content = append(content, []byte("}\n")...)
 
-	err := ioutil.WriteFile("../message/msgMgr.go", content, 0666)
+	err := ioutil.WriteFile("../csmsg/msgMgr.go", content, 0666)
 	if err != nil {
 		log.Panic("Write MsgMgr.go Error:", err)
 	}
@@ -113,18 +113,18 @@ func (this *MsgMgr) Gen() {
 
 func (this *MsgMgr) GenMsgInfo(name string) {
 	content := make([]byte, 0)
-	content = append(content, []byte("package message\n")...)
+	content = append(content, []byte("package csmsg\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("import (\n")...)
 	content = append(content, []byte("	\"gameproject/common\"\n")...)
-	content = append(content, []byte("	\"gameproject/server/msgProto\"\n")...)
+	content = append(content, []byte("	\"gameproject/server/client/csproto\"\n")...)
 	content = append(content, []byte("	\"gameproject/server/transMgr\"\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("	\"github.com/golang/protobuf/proto\"\n")...)
 	content = append(content, []byte(")\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("type "+name+" struct {\n")...)
-	content = append(content, []byte("	msgProto."+name+"\n")...)
+	content = append(content, []byte("	csproto."+name+"\n")...)
 	content = append(content, []byte("	l ISend  // Link缩写\n")...)
 	content = append(content, []byte("	g ISend  // Global缩写\n")...)
 	content = append(content, []byte("	r uint64 // RoleId缩写\n")...)
@@ -202,7 +202,7 @@ func (this *MsgMgr) GenMsgInfo(name string) {
 	}
 	content = append(content, []byte("}\n")...)
 
-	filename := "../message/" + name + ".go"
+	filename := "../csmsg/" + name + ".go"
 	err := ioutil.WriteFile(filename, content, 0666)
 	if err != nil {
 		log.Panic("Write "+name+".go Error:", err)
@@ -216,14 +216,14 @@ func GenMsgProcess(name string) {
 	}
 
 	// 文件存在，可能有写具体的处理逻辑，生成代码会覆盖，所以直接返回
-	filename := "../message/" + name + "Process.go"
+	filename := "../csmsg/" + name + "Process.go"
 	_, err := os.Stat(filename)
 	if err == nil || os.IsNotExist(err) == false {
 		return
 	}
 
 	content := make([]byte, 0)
-	content = append(content, []byte("package message\n")...)
+	content = append(content, []byte("package csmsg\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("import (\n")...)
 	content = append(content, []byte("	\"gameproject/server/transMgr\"\n")...)

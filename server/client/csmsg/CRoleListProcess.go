@@ -1,8 +1,8 @@
-package message
+package csmsg
 
 import (
+	"gameproject/server/client/csproto"
 	"gameproject/server/db/table"
-	"gameproject/server/msgProto"
 	"gameproject/server/transMgr"
 	"log"
 )
@@ -25,7 +25,7 @@ func (this *CRoleListProcess) Process() bool {
 		for _, rId := range u.RoleIdList {
 			roleInfo := table.SelectProperty(rId)
 			if roleInfo != nil {
-				r := &msgProto.SRoleList_RoleInfo{}
+				r := &csproto.SRoleList_RoleInfo{}
 				r.RoleId = rId
 				r.RoleName = roleInfo.RoleName
 				r.Level = roleInfo.Level

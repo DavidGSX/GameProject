@@ -1,12 +1,12 @@
 package main
 
 import (
+	"gameproject/server/client/csmsg"
 	"gameproject/server/config"
 	"gameproject/server/db/cacheMgr"
 	"gameproject/server/jmxMgr"
 	"gameproject/server/lockMgr"
 	"gameproject/server/manager"
-	"gameproject/server/message"
 	"gameproject/server/rpcMgr"
 	"log"
 	"net/http"
@@ -30,7 +30,7 @@ func main() {
 	cfg := config.GetConfig()
 	cfg.Show()
 	// 服务器协议初始化
-	message.Init()
+	csmsg.Init()
 	// 数据缓存和数据库连接池初始化
 	cacheMgr.CacheInit(cfg)
 	<-time.After(2e9) // 2秒初始化时间

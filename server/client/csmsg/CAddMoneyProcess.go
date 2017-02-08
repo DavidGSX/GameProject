@@ -1,4 +1,4 @@
-package message
+package csmsg
 
 import (
 	"gameproject/server/db/table"

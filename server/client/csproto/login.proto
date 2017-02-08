@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package msgProto;
+package csproto;
 
 message CUserLogin {
 	string userId = 1;

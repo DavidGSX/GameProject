@@ -3,8 +3,8 @@ package manager
 import (
 	"gameproject/common"
 	"gameproject/global/protocol"
+	"gameproject/server/client/csproto"
 	"gameproject/server/config"
-	"gameproject/server/msgProto"
 	"log"
 	"net"
 	"strconv"
@@ -178,14 +178,14 @@ func (this *GlobalConn) OnAuthResult(b []byte) {
 	log.Println("OnAuthResult userId:", userId, " plat:", plat, " result:", result)
 	link := GetLinkMgr().GetLinkByUserId(userId)
 
-	loginRes := &msgProto.SUserLogin{}
+	loginRes := &csproto.SUserLogin{}
 	if result == "ok" {
-		loginRes.LoginRes = msgProto.SUserLogin_SUCCESS
+		loginRes.LoginRes = csproto.SUserLogin_SUCCESS
 		if link != nil {
 			link.SetAuthored()
 		}
 	} else {
-		loginRes.LoginRes = msgProto.SUserLogin_PASSWD_ERR
+		loginRes.LoginRes = csproto.SUserLogin_PASSWD_ERR
 	}
 	data, err := proto.Marshal(loginRes)
 	if err != nil {
