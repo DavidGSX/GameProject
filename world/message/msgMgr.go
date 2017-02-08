@@ -1,6 +1,7 @@
 package message
 
 import (
+	"gameproject/common"
 	"gameproject/world/transMgr"
 
 	"github.com/golang/protobuf/proto"
@@ -19,9 +20,22 @@ type MsgInfo interface {
 }
 
 type ISend interface {
-	Send(x []byte)
+	Send(b []byte)
+	SendByZoneIds(zoneIds []uint32, b []byte)
 	SetZoneId(z uint32)
 	GetZoneId() uint32
+}
+
+func GetMsgByte(msg MsgInfo) (error, []byte) {
+	data, err := proto.Marshal(msg.GetMsg())
+	if err != nil {
+		return err, nil
+	}
+	oct := &common.Octets{}
+	oct.MarshalUint32(uint32(len(data)))
+	oct.MarshalUint32(msg.MsgType())
+	oct.MarshalBytesOnly(data)
+	return nil, oct.GetBuf()
 }
 
 var MsgInfos map[int]MsgInfo

@@ -13,6 +13,12 @@ type CRoleListProcess struct {
 }
 
 func (this *CRoleListProcess) Process() bool {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("CRoleListProcess Error:", err)
+		}
+	}()
+
 	sendInfo := &SRoleList{}
 	u := table.SelectUser(this.msg.Getl().GetUserId())
 	if u != nil {

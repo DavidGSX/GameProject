@@ -26,6 +26,29 @@ func GetServerMgr() *ServerMgr {
 	return serverMgr
 }
 
+func ServerMgrInit(cfg *config.WorldConfig) {
+	ip := cfg.ServerIP
+	port := cfg.ServerPort
+	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(int(port)))
+	if err != nil {
+		log.Fatal("Server Listen Error:", err)
+	}
+	log.Println("Server Listen ", ip, port)
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("Server Error -> ", err)
+		}
+	}()
+
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Panic("Server Accept Error:", err)
+		}
+		go NewServer(conn).Process()
+	}
+}
+
 func (this *ServerMgr) AddServer(zoneId uint32, s *Server) {
 	serverMgrLock.Lock()
 	defer serverMgrLock.Unlock()
@@ -58,25 +81,18 @@ func (this *ServerMgr) GetServer(zoneId uint32) *Server {
 	}
 }
 
-func ServerMgrInit(cfg *config.WorldConfig) {
-	ip := cfg.ServerIP
-	port := cfg.ServerPort
-	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(int(port)))
-	if err != nil {
-		log.Fatal("Server Listen Error:", err)
-	}
-	log.Println("Server Listen ", ip, port)
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println("Server Error -> ", err)
+func (this *ServerMgr) SendByZoneIds(zoneIds []uint32, b []byte) {
+	if len(zoneIds) == 0 {
+		for _, s := range this.zoneId2Server {
+			s.Send(b)
 		}
-	}()
-
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			log.Panic("Server Accept Error:", err)
+	} else {
+		for _, z := range zoneIds {
+			if this.GetServer(z) == nil {
+				log.Println("Server not Connect to World, ZoneId:", z)
+			} else {
+				this.GetServer(z).Send(b)
+			}
 		}
-		go NewServer(conn).Process()
 	}
 }

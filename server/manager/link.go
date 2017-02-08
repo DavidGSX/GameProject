@@ -130,7 +130,7 @@ func (this *Link) OnReceive() {
 		this.recvBuf = this.recvBuf[oct.Pos():]
 	}
 
-	// 缓冲区大于100K，断开客户端连接
+	// 接收缓冲区大于100K，断开客户端连接
 	if len(this.recvBuf) > 100*1024 {
 		log.Panic("Receive Buffer too Big!")
 	}
@@ -159,4 +159,9 @@ func (this *Link) Send(x []byte) {
 
 	this.sendBuf = append(this.sendBuf, x...)
 	//log.Println("Link Send Buffer", this.sendBuf)
+
+	// 发送缓冲区大于1M，断开客户端连接
+	if len(this.sendBuf) > 1024*1024 {
+		log.Panic("Send Buffer too Big!")
+	}
 }

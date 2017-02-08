@@ -16,6 +16,12 @@ type CCreateRoleProcess struct {
 }
 
 func (this *CCreateRoleProcess) Process() bool {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("CCreateRoleProcess Error:", err)
+		}
+	}()
+
 	sendInfo := &SCreateRole{}
 	var rId uint64
 	if rpcMgr.NameExist(this.msg.Name) {

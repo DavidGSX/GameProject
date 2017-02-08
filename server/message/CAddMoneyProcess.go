@@ -12,6 +12,12 @@ type CAddMoneyProcess struct {
 }
 
 func (this *CAddMoneyProcess) Process() bool {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("CAddMoneyProcess Error:", err)
+		}
+	}()
+
 	sendInfo := &SMoneyInfo{}
 	sendInfo.RoleId = this.msg.RoleId
 

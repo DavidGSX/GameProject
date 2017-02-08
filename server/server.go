@@ -33,12 +33,12 @@ func main() {
 	message.Init()
 	// 数据缓存和数据库连接池初始化
 	cacheMgr.CacheInit(cfg)
+	<-time.After(2e9) // 2秒初始化时间
 	// 锁管理器的初始化
 	lockMgr.LockMgrInit()
 	// RPC初始化
 	rpcMgr.RPCInit(cfg)
-
-	<-time.After(3e9) // 3秒初始化时间
+	<-time.After(3e9) // 2秒初始化时间
 
 	go manager.LinkMgrInit(cfg)
 	go manager.GlobalMgrInit(cfg)

@@ -39,6 +39,7 @@ func (this *Server) SetZoneId(z uint32) {
 		log.Println("SetZoneId old:", this.zoneId, " new:", z)
 	}
 	this.zoneId = z
+	log.Println("Server SetZoneId ", this.zoneId, this.conn.RemoteAddr().String())
 	GetServerMgr().AddServer(z, this)
 }
 
@@ -145,10 +146,14 @@ func (this *Server) OnSend() {
 	this.sendBuf = this.sendBuf[n:]
 }
 
-func (this *Server) Send(x []byte) {
+func (this *Server) Send(b []byte) {
 	this.sendLock.Lock()
 	defer this.sendLock.Unlock()
 
-	this.sendBuf = append(this.sendBuf, x...)
+	this.sendBuf = append(this.sendBuf, b...)
 	//log.Println("Server Send Buffer", this.sendBuf)
+}
+
+func (this *Server) SendByZoneIds(zoneIds []uint32, b []byte) {
+	GetServerMgr().SendByZoneIds(zoneIds, b)
 }
