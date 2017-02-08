@@ -1,7 +1,7 @@
 package transMgr
 
 import (
-	"gameproject/server/lockMgr"
+	"gameproject/world/lockMgr"
 	"log"
 	"time"
 )

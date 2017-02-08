@@ -2,27 +2,39 @@
 	"MsgInfos" : [
 		{
 			"MsgType" : 101,
-			"MsgName" : "GS2WServerStart"
+			"MsgName" : "S2WServerStart"
 		},
 		{
 			"MsgType" : 102,
-			"MsgName" : "W2GSServerStartRes"
+			"MsgName" : "W2SServerStartRes"
 		},
 		{
 			"MsgType" : 103,
-			"MsgName" : "GS2WSendInfo"
+			"MsgName" : "S2WSendInfo"
 		},
 		{
 			"MsgType" : 104,
-			"MsgName" : "W2GSSendInfo"
+			"MsgName" : "W2SSendInfo"
 		},
 		{
 			"MsgType" : 105,
-			"MsgName" : "W2GSDispatch"
+			"MsgName" : "W2SDispatch"
 		},
 		{
 			"MsgType" : 106,
-			"MsgName" : "W2GSBroadcast"
+			"MsgName" : "W2SBroadcast"
+		},
+		{
+			"MsgType" : 107,
+			"MsgName" : "S2WRoleInfoChange"
+		},
+		{
+			"MsgType" : 108,
+			"MsgName" : "S2WRoleInfoRequest"
+		},
+		{
+			"MsgType" : 109,
+			"MsgName" : "W2SRoleInfoResponse"
 		}
 	]
 }

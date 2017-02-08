@@ -42,12 +42,15 @@ var MsgInfos map[int]MsgInfo
 
 func Init() {
 	MsgInfos = make(map[int]MsgInfo)
-	MsgInfos[101] = new(GS2WServerStart)
-	MsgInfos[102] = new(W2GSServerStartRes)
-	MsgInfos[103] = new(GS2WSendInfo)
-	MsgInfos[104] = new(W2GSSendInfo)
-	MsgInfos[105] = new(W2GSDispatch)
-	MsgInfos[106] = new(W2GSBroadcast)
+	MsgInfos[101] = new(S2WServerStart)
+	MsgInfos[102] = new(W2SServerStartRes)
+	MsgInfos[103] = new(S2WSendInfo)
+	MsgInfos[104] = new(W2SSendInfo)
+	MsgInfos[105] = new(W2SDispatch)
+	MsgInfos[106] = new(W2SBroadcast)
+	MsgInfos[107] = new(S2WRoleInfoChange)
+	MsgInfos[108] = new(S2WRoleInfoRequest)
+	MsgInfos[109] = new(W2SRoleInfoResponse)
 }
 
 func GetMsg(t int) MsgInfo {

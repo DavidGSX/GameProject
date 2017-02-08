@@ -8,38 +8,38 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-type W2GSDispatch struct {
-	msgProto.W2GSDispatch
+type W2SBroadcast struct {
+	msgProto.W2SBroadcast
 	s ISend  // Server缩写
 }
 
-func (this *W2GSDispatch) Clone() MsgInfo {
-	return new(W2GSDispatch)
+func (this *W2SBroadcast) Clone() MsgInfo {
+	return new(W2SBroadcast)
 }
 
-func (this *W2GSDispatch) MsgType() uint32 {
-	return 105
+func (this *W2SBroadcast) MsgType() uint32 {
+	return 106
 }
 
-func (this *W2GSDispatch) GetMsg() proto.Message {
-	return &this.W2GSDispatch
+func (this *W2SBroadcast) GetMsg() proto.Message {
+	return &this.W2SBroadcast
 }
 
 // 避免与协议的函数名称重复，以下函数命名有点特殊
-func (this *W2GSDispatch) Sets(s ISend) {
+func (this *W2SBroadcast) Sets(s ISend) {
 	this.s = s
 }
 
-func (this *W2GSDispatch) Gets() ISend {
+func (this *W2SBroadcast) Gets() ISend {
 	return this.s
 }
 
-func (this *W2GSDispatch) Unmarshal(data []byte) error {
-	err := proto.Unmarshal(data, &this.W2GSDispatch)
+func (this *W2SBroadcast) Unmarshal(data []byte) error {
+	err := proto.Unmarshal(data, &this.W2SBroadcast)
 	return err
 }
 
-func (this *W2GSDispatch) Send(msg MsgInfo) error {
+func (this *W2SBroadcast) Send(msg MsgInfo) error {
 	data, err := proto.Marshal(msg.GetMsg())
 	if err != nil {
 		return err
@@ -52,7 +52,7 @@ func (this *W2GSDispatch) Send(msg MsgInfo) error {
 	return nil
 }
 
-func (this *W2GSDispatch) Process(t *transMgr.Trans) bool {
+func (this *W2SBroadcast) Process(t *transMgr.Trans) bool {
 	// do nothing
 	return false
 }

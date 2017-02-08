@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package dbProto;
+
+message AllRoleInfo {
+	message RoleInfo {
+		string roleName = 1;
+		uint32 level = 2;
+		uint32 school = 3;
+		uint32 sex = 4;
+		uint64 lasttime = 5;
+	}
+	
+	message ServerRoleInfo {
+		map<uint64, RoleInfo> roleId2Info = 1;
+	}
+	
+	map<uint32, ServerRoleInfo> zoneId2Info = 1;
+}

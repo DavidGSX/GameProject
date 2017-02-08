@@ -2,36 +2,68 @@ syntax = "proto3";
 
 package msgProto;
 
-message GS2WServerStart {
+message S2WServerStart {
 	uint32 zoneId = 1;
 }
 
-message W2GSServerStartRes {
+message W2SServerStartRes {
 }
 
-message GS2WSendInfo {
-	uint32 zoneId = 1;
-	string userId = 2;
-	uint32 type = 3;
-	string info = 4;
-}
-
-message W2GSSendInfo {
+message S2WSendInfo {
 	uint32 zoneId = 1;
 	string userId = 2;
 	uint32 type = 3;
 	string info = 4;
 }
 
-message W2GSDispatch {
+message W2SSendInfo {
+	uint32 zoneId = 1;
+	string userId = 2;
+	uint32 type = 3;
+	string info = 4;
+}
+
+message W2SDispatch {
 	uint32 fromZoneId = 1;
 	uint32 toZoneId = 2;
 	uint32 type = 3;
 	string info = 4;
 }
 
-message W2GSBroadcast {
+message W2SBroadcast {
 	repeated uint32 zoneIds = 1;
 	uint32 type = 2;
 	string info = 3;
+}
+
+message S2WRoleInfoChange {
+	message RoleInfo {
+		uint64 roleId = 1;
+		string roleName = 2;
+		uint32 level = 3;
+		uint32 school = 4;
+		uint32 sex = 5;
+		uint64 lasttime = 6;
+	}
+	uint32 zoneId = 1;
+	string userId = 2;
+	uint64 roleId = 3;
+	RoleInfo info = 4;
+}
+
+message S2WRoleInfoRequest {
+	enum ReqType {
+		ROLE_LIST = 0;
+		LAST_LOGIN = 1;
+	}
+	uint32 zoneId = 1;
+	string userId = 2;
+	uint64 roleId = 3;
+	ReqType req = 4;
+}
+
+message W2SRoleInfoResponse {
+	uint64 roleId = 1;
+	S2WRoleInfoRequest.ReqType req = 2;
+	repeated S2WRoleInfoChange.RoleInfo info = 3;
 }

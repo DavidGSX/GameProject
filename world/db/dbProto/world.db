@@ -1,0 +1,9 @@
+{
+	"TableInfos" : [
+		{
+			"TableName"	: "AllRoleInfo",
+			"KeyType"	: "string",
+			"IsSave" 	: true
+		}
+	]
+}
