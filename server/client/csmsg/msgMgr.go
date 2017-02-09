@@ -1,7 +1,7 @@
 package csmsg
 
 import (
-	"gameproject/server/transMgr"
+	"gameproject/common"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -19,7 +19,7 @@ type MsgInfo interface {
 	Getg() ISend
 	Unmarshal(data []byte) error
 	Send(MsgInfo) error
-	Process(t *transMgr.Trans) bool
+	Process(t *common.Trans) bool
 }
 
 type ISend interface {

@@ -52,8 +52,6 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 	content = append(content, []byte("	\"gameproject/common\"\n")...)
 	content = append(content, []byte("	\"gameproject/world/db/cacheMgr\"\n")...)
 	content = append(content, []byte("	\"gameproject/world/db/dbProto\"\n")...)
-	content = append(content, []byte("	\"gameproject/world/lockMgr\"\n")...)
-	content = append(content, []byte("	\"gameproject/world/transMgr\"\n")...)
 	content = append(content, []byte("	\"log\"\n")...)
 	switch keyType {
 	case "uint64":
@@ -79,7 +77,7 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 
 	switch keyType {
 	case "string":
-		content = append(content, []byte("func New"+name+"(t *transMgr.Trans, k string) *"+name+" {\n")...)
+		content = append(content, []byte("func New"+name+"(t *common.Trans, k string) *"+name+" {\n")...)
 		content = append(content, []byte("	r := new("+name+")\n")...)
 		content = append(content, []byte("	r.k = \""+name+"_\" + k\n")...)
 		content = append(content, []byte("	if t != nil {\n")...)
@@ -88,13 +86,13 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 		content = append(content, []byte("	return r\n")...)
 		content = append(content, []byte("}\n")...)
 		content = append(content, []byte("\n")...)
-		content = append(content, []byte("func Get"+name+"(t *transMgr.Trans, k string) *"+name+" {\n")...)
+		content = append(content, []byte("func Get"+name+"(t *common.Trans, k string) *"+name+" {\n")...)
 		content = append(content, []byte("	if k == \"\" {\n")...)
 		content = append(content, []byte("		return nil\n")...)
 		content = append(content, []byte("	}\n")...)
 		content = append(content, []byte("	key := \""+name+"_\" + k\n")...)
 	case "uint64":
-		content = append(content, []byte("func New"+name+"(t *transMgr.Trans, k uint64) *"+name+" {\n")...)
+		content = append(content, []byte("func New"+name+"(t *common.Trans, k uint64) *"+name+" {\n")...)
 		content = append(content, []byte("	r := new("+name+")\n")...)
 		content = append(content, []byte("	r.k = \""+name+"_\" + strconv.FormatUint(k, 10)\n")...)
 		content = append(content, []byte("	if t != nil {\n")...)
@@ -103,7 +101,7 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 		content = append(content, []byte("	return r\n")...)
 		content = append(content, []byte("}\n")...)
 		content = append(content, []byte("\n")...)
-		content = append(content, []byte("func Get"+name+"(t *transMgr.Trans, k uint64) *"+name+" {\n")...)
+		content = append(content, []byte("func Get"+name+"(t *common.Trans, k uint64) *"+name+" {\n")...)
 		content = append(content, []byte("	if k == 0 {\n")...)
 		content = append(content, []byte("		return nil\n")...)
 		content = append(content, []byte("	}\n")...)
@@ -149,8 +147,8 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 	default:
 		log.Panic("Unkown Key Type table:", name)
 	}
-	content = append(content, []byte("	lockMgr.Lock(key)\n")...)
-	content = append(content, []byte("	defer lockMgr.Unlock(key)\n")...)
+	content = append(content, []byte("	common.Lock(key)\n")...)
+	content = append(content, []byte("	defer common.Unlock(key)\n")...)
 	content = append(content, []byte("	v := cacheMgr.GetKV(key)\n")...)
 	content = append(content, []byte("	if v == \"\" {\n")...)
 	content = append(content, []byte("		return nil\n")...)

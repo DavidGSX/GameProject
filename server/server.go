@@ -1,11 +1,11 @@
 package main
 
 import (
+	"gameproject/common"
 	"gameproject/server/client/csmsg"
 	"gameproject/server/config"
 	"gameproject/server/db/cacheMgr"
 	"gameproject/server/jmxMgr"
-	"gameproject/server/lockMgr"
 	"gameproject/server/manager"
 	"gameproject/server/rpcMgr"
 	"log"
@@ -35,7 +35,7 @@ func main() {
 	cacheMgr.CacheInit(cfg)
 	<-time.After(2e9) // 2秒初始化时间
 	// 锁管理器的初始化
-	lockMgr.LockMgrInit()
+	common.LockMgrInit()
 	// RPC初始化
 	rpcMgr.RPCInit(cfg)
 	<-time.After(3e9) // 2秒初始化时间

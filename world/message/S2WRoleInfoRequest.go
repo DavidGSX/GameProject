@@ -3,7 +3,6 @@ package message
 import (
 	"gameproject/common"
 	"gameproject/world/msgProto"
-	"gameproject/world/transMgr"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -52,7 +51,7 @@ func (this *S2WRoleInfoRequest) Send(msg MsgInfo) error {
 	return nil
 }
 
-func (this *S2WRoleInfoRequest) Process(t *transMgr.Trans) bool {
+func (this *S2WRoleInfoRequest) Process(t *common.Trans) bool {
 	p := new(S2WRoleInfoRequestProcess)
 	p.msg = this
 	p.trans = t

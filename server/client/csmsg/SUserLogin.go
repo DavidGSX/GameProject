@@ -3,7 +3,6 @@ package csmsg
 import (
 	"gameproject/common"
 	"gameproject/server/client/csproto"
-	"gameproject/server/transMgr"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -70,7 +69,7 @@ func (this *SUserLogin) Send(msg MsgInfo) error {
 	return nil
 }
 
-func (this *SUserLogin) Process(t *transMgr.Trans) bool {
+func (this *SUserLogin) Process(t *common.Trans) bool {
 	// do nothing
 	return false
 }

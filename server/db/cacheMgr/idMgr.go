@@ -1,15 +1,15 @@
 package cacheMgr
 
 import (
+	"gameproject/common"
 	"gameproject/server/config"
-	"gameproject/server/lockMgr"
 	"log"
 	"strconv"
 )
 
 func GetUniqIdByTableName(key string) (r uint64) {
-	lockMgr.Lock(key)
-	defer lockMgr.Unlock(key)
+	common.Lock(key)
+	defer common.Unlock(key)
 
 	v := GetKV(key)
 	if v == "" {

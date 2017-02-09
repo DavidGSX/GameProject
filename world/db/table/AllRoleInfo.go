@@ -4,8 +4,6 @@ import (
 	"gameproject/common"
 	"gameproject/world/db/cacheMgr"
 	"gameproject/world/db/dbProto"
-	"gameproject/world/lockMgr"
-	"gameproject/world/transMgr"
 	"log"
 
 	"github.com/golang/protobuf/proto"
@@ -20,7 +18,7 @@ func (this *AllRoleInfo) IsSave() bool {
 	return true
 }
 
-func NewAllRoleInfo(t *transMgr.Trans, k string) *AllRoleInfo {
+func NewAllRoleInfo(t *common.Trans, k string) *AllRoleInfo {
 	r := new(AllRoleInfo)
 	r.k = "AllRoleInfo_" + k
 	if t != nil {
@@ -29,7 +27,7 @@ func NewAllRoleInfo(t *transMgr.Trans, k string) *AllRoleInfo {
 	return r
 }
 
-func GetAllRoleInfo(t *transMgr.Trans, k string) *AllRoleInfo {
+func GetAllRoleInfo(t *common.Trans, k string) *AllRoleInfo {
 	if k == "" {
 		return nil
 	}
@@ -61,8 +59,8 @@ func SelectAllRoleInfo(k string) *AllRoleInfo {
 		return nil
 	}
 	key := "AllRoleInfo_" + k
-	lockMgr.Lock(key)
-	defer lockMgr.Unlock(key)
+	common.Lock(key)
+	defer common.Unlock(key)
 	v := cacheMgr.GetKV(key)
 	if v == "" {
 		return nil

@@ -2,7 +2,6 @@ package message
 
 import (
 	"gameproject/common"
-	"gameproject/world/transMgr"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -16,7 +15,7 @@ type MsgInfo interface {
 	Gets() ISend
 	Unmarshal(data []byte) error
 	Send(MsgInfo) error
-	Process(t *transMgr.Trans) bool
+	Process(t *common.Trans) bool
 }
 
 type ISend interface {

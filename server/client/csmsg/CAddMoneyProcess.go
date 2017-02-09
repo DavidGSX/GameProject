@@ -1,14 +1,14 @@
 package csmsg
 
 import (
+	"gameproject/common"
 	"gameproject/server/db/table"
-	"gameproject/server/transMgr"
 	"log"
 )
 
 type CAddMoneyProcess struct {
 	msg   *CAddMoney
-	trans *transMgr.Trans
+	trans *common.Trans
 }
 
 func (this *CAddMoneyProcess) Process() bool {

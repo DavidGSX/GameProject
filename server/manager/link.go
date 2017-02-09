@@ -3,7 +3,6 @@ package manager
 import (
 	"gameproject/common"
 	"gameproject/server/client/csmsg"
-	"gameproject/server/transMgr"
 	"log"
 	"net"
 	"sync"
@@ -125,7 +124,7 @@ func (this *Link) OnReceive() {
 		msg.Setr(this.roleId)
 		msg.Setl(this)
 		msg.Setg(GetGlobalConn())
-		transMgr.NewTrans().Process(msg)
+		common.NewTrans().Process(msg)
 
 		this.recvBuf = this.recvBuf[oct.Pos():]
 	}

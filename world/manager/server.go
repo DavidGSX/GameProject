@@ -3,7 +3,6 @@ package manager
 import (
 	"gameproject/common"
 	"gameproject/world/message"
-	"gameproject/world/transMgr"
 	"log"
 	"net"
 	"sync"
@@ -118,7 +117,7 @@ func (this *Server) OnReceive() {
 			log.Panic("Unmarshal Protocol Error:", err, " Type:", msgType)
 		}
 		msg.Sets(this)
-		transMgr.NewTrans().Process(msg)
+		common.NewTrans().Process(msg)
 
 		this.recvBuf = this.recvBuf[oct.Pos():]
 	}

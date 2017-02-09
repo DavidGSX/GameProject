@@ -1,9 +1,9 @@
 package main
 
 import (
+	"gameproject/common"
 	"gameproject/world/config"
 	"gameproject/world/db/cacheMgr"
-	"gameproject/world/lockMgr"
 	"gameproject/world/manager"
 	"gameproject/world/message"
 	"sync"
@@ -24,7 +24,7 @@ func main() {
 	cacheMgr.CacheInit(cfg)
 	<-time.After(2e9) // 2秒初始化时间
 	// 锁管理器的初始化
-	lockMgr.LockMgrInit()
+	common.LockMgrInit()
 	<-time.After(2e9) // 3秒初始化时间
 
 	go manager.ServerMgrInit(cfg)

@@ -1,4 +1,4 @@
-package lockMgr
+package common
 
 import (
 	"log"

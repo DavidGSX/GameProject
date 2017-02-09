@@ -4,8 +4,6 @@ import (
 	"gameproject/common"
 	"gameproject/server/db/cacheMgr"
 	"gameproject/server/db/dbProto"
-	"gameproject/server/lockMgr"
-	"gameproject/server/transMgr"
 	"log"
 	"strconv"
 
@@ -21,7 +19,7 @@ func (this *Property) IsSave() bool {
 	return true
 }
 
-func NewProperty(t *transMgr.Trans, k uint64) *Property {
+func NewProperty(t *common.Trans, k uint64) *Property {
 	r := new(Property)
 	r.k = "Property_" + strconv.FormatUint(k, 10)
 	if t != nil {
@@ -30,7 +28,7 @@ func NewProperty(t *transMgr.Trans, k uint64) *Property {
 	return r
 }
 
-func GetProperty(t *transMgr.Trans, k uint64) *Property {
+func GetProperty(t *common.Trans, k uint64) *Property {
 	if k == 0 {
 		return nil
 	}
@@ -62,8 +60,8 @@ func SelectProperty(k uint64) *Property {
 		return nil
 	}
 	key := "Property_" + strconv.FormatUint(k, 10)
-	lockMgr.Lock(key)
-	defer lockMgr.Unlock(key)
+	common.Lock(key)
+	defer common.Unlock(key)
 	v := cacheMgr.GetKV(key)
 	if v == "" {
 		return nil

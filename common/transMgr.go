@@ -1,7 +1,6 @@
-package transMgr
+package common
 
 import (
-	"gameproject/world/lockMgr"
 	"log"
 	"time"
 )
@@ -61,14 +60,14 @@ func (this *Trans) Lock(names ...string) {
 	}
 
 	this.keys = append(this.keys, tmpKey...)
-	lockMgr.Lock(tmpKey...)
+	Lock(tmpKey...)
 }
 
 func (this *Trans) Unlock() {
 	if len(this.keys) == 0 {
 		return
 	}
-	lockMgr.Unlock(this.keys...)
+	Unlock(this.keys...)
 }
 
 func (this *Trans) Save(t tSave) {

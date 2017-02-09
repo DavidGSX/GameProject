@@ -1,15 +1,15 @@
 package csmsg
 
 import (
+	"gameproject/common"
 	"gameproject/server/client/csproto"
 	"gameproject/server/db/table"
-	"gameproject/server/transMgr"
 	"log"
 )
 
 type CRoleListProcess struct {
 	msg   *CRoleList
-	trans *transMgr.Trans
+	trans *common.Trans
 }
 
 func (this *CRoleListProcess) Process() bool {

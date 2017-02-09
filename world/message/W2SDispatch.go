@@ -3,7 +3,6 @@ package message
 import (
 	"gameproject/common"
 	"gameproject/world/msgProto"
-	"gameproject/world/transMgr"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -52,7 +51,7 @@ func (this *W2SDispatch) Send(msg MsgInfo) error {
 	return nil
 }
 
-func (this *W2SDispatch) Process(t *transMgr.Trans) bool {
+func (this *W2SDispatch) Process(t *common.Trans) bool {
 	// do nothing
 	return false
 }

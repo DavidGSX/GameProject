@@ -4,8 +4,6 @@ import (
 	"gameproject/common"
 	"gameproject/server/db/cacheMgr"
 	"gameproject/server/db/dbProto"
-	"gameproject/server/lockMgr"
-	"gameproject/server/transMgr"
 	"log"
 
 	"github.com/golang/protobuf/proto"
@@ -20,7 +18,7 @@ func (this *User) IsSave() bool {
 	return true
 }
 
-func NewUser(t *transMgr.Trans, k string) *User {
+func NewUser(t *common.Trans, k string) *User {
 	r := new(User)
 	r.k = "User_" + k
 	if t != nil {
@@ -29,7 +27,7 @@ func NewUser(t *transMgr.Trans, k string) *User {
 	return r
 }
 
-func GetUser(t *transMgr.Trans, k string) *User {
+func GetUser(t *common.Trans, k string) *User {
 	if k == "" {
 		return nil
 	}
@@ -61,8 +59,8 @@ func SelectUser(k string) *User {
 		return nil
 	}
 	key := "User_" + k
-	lockMgr.Lock(key)
-	defer lockMgr.Unlock(key)
+	common.Lock(key)
+	defer common.Unlock(key)
 	v := cacheMgr.GetKV(key)
 	if v == "" {
 		return nil

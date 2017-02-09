@@ -3,7 +3,6 @@ package csmsg
 import (
 	"gameproject/common"
 	"gameproject/global/protocol"
-	"gameproject/server/transMgr"
 	"log"
 
 	"github.com/golang/protobuf/proto"
@@ -11,7 +10,7 @@ import (
 
 type CUserLoginProcess struct {
 	msg   *CUserLogin
-	trans *transMgr.Trans
+	trans *common.Trans
 }
 
 func (this *CUserLoginProcess) Process() bool {

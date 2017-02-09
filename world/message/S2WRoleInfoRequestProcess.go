@@ -1,13 +1,13 @@
 package message
 
 import (
-	"gameproject/world/transMgr"
+	"gameproject/common"
 	"log"
 )
 
 type S2WRoleInfoRequestProcess struct {
 	msg   *S2WRoleInfoRequest
-	trans *transMgr.Trans
+	trans *common.Trans
 }
 
 func (this *S2WRoleInfoRequestProcess) Process() bool {
@@ -16,7 +16,7 @@ func (this *S2WRoleInfoRequestProcess) Process() bool {
 			log.Println("S2WRoleInfoRequestProcess Error:", err)
 		}
 	}()
-	
+
 	log.Println("to do S2WRoleInfoRequestProcess")
 	return true
 }

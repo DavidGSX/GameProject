@@ -1,18 +1,18 @@
 package csmsg
 
 import (
+	"gameproject/common"
 	"gameproject/server/client/csproto"
 	"gameproject/server/db/cacheMgr"
 	"gameproject/server/db/table"
 	"gameproject/server/rpcMgr"
-	"gameproject/server/transMgr"
 	"log"
 	"time"
 )
 
 type CCreateRoleProcess struct {
 	msg   *CCreateRole
-	trans *transMgr.Trans
+	trans *common.Trans
 }
 
 func (this *CCreateRoleProcess) Process() bool {

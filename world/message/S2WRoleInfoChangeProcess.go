@@ -1,15 +1,15 @@
 package message
 
 import (
+	"gameproject/common"
 	"gameproject/world/db/dbProto"
 	"gameproject/world/db/table"
-	"gameproject/world/transMgr"
 	"log"
 )
 
 type S2WRoleInfoChangeProcess struct {
 	msg   *S2WRoleInfoChange
-	trans *transMgr.Trans
+	trans *common.Trans
 }
 
 func (this *S2WRoleInfoChangeProcess) Process() bool {

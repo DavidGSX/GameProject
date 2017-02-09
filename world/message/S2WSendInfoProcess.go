@@ -1,13 +1,13 @@
 package message
 
 import (
-	"gameproject/world/transMgr"
+	"gameproject/common"
 	"log"
 )
 
 type S2WSendInfoProcess struct {
 	msg   *S2WSendInfo
-	trans *transMgr.Trans
+	trans *common.Trans
 }
 
 func (this *S2WSendInfoProcess) Process() bool {

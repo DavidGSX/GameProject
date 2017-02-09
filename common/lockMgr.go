@@ -1,7 +1,6 @@
-package lockMgr
+package common
 
 import (
-	"gameproject/common"
 	"log"
 	"sync"
 	"time"
@@ -58,7 +57,7 @@ func getLock(name string) *LockInfo {
 }
 
 func Lock(names ...string) {
-	names = common.SortAndRemoveEmptyDuplicates(names)
+	names = SortAndRemoveEmptyDuplicates(names)
 	for _, v := range names {
 		getLock(v).Lock(v)
 	}
@@ -66,7 +65,7 @@ func Lock(names ...string) {
 }
 
 func Unlock(names ...string) {
-	names = common.SortAndRemoveEmptyDuplicates(names)
+	names = SortAndRemoveEmptyDuplicates(names)
 	for _, v := range names {
 		getLock(v).Unlock()
 	}

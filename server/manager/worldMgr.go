@@ -77,7 +77,7 @@ func (this *WorldConn) OnRegisterWorld(cfg *config.ServerConfig) {
 		}
 	}()
 
-	send := &msgProto.GS2WServerStart{}
+	send := &msgProto.S2WServerStart{}
 	send.ZoneId = cfg.GetZoneId()
 	data, err := proto.Marshal(send)
 	if err != nil {
@@ -163,7 +163,7 @@ func (this *WorldConn) OnReceive() {
 }
 
 func (this *WorldConn) OnRegisted(b []byte) {
-	res := &msgProto.W2GSServerStartRes{}
+	res := &msgProto.W2SServerStartRes{}
 	err := proto.Unmarshal(b, res)
 	if err != nil {
 		log.Println("unmarshal W2GSServerStartRes error:", err)
