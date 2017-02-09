@@ -1,11 +1,18 @@
-package cacheMgr
+package cache
 
 import (
 	"gameproject/common"
-	"gameproject/server/config"
 	"log"
 	"strconv"
 )
+
+var (
+	ZoneId uint32
+)
+
+func SetZoneId(z uint32) {
+	ZoneId = z
+}
 
 func GetUniqIdByTableName(key string) (r uint64) {
 	common.Lock(key)
@@ -13,7 +20,7 @@ func GetUniqIdByTableName(key string) (r uint64) {
 
 	v := GetKV(key)
 	if v == "" {
-		r = uint64(config.GetConfig().GetZoneId())
+		r = uint64(ZoneId)
 	} else {
 		last, err := strconv.ParseUint(v, 10, 64)
 		if err != nil {

@@ -1,7 +1,6 @@
-package cacheMgr
+package cache
 
 import (
-	"gameproject/world/config"
 	"log"
 	"sync"
 	"time"
@@ -12,16 +11,48 @@ type ValueInfo struct {
 	t time.Time
 }
 
-var dbCacheMap map[string]*ValueInfo
-var dbCacheMapLock sync.Mutex
+type DBType int32
 
-func CacheInit(cfg *config.WorldConfig) {
+const (
+	MongoDB DBType = 1
+	SSDB    DBType = 2
+)
+
+var (
+	dbCacheMap     map[string]*ValueInfo
+	dbCacheMapLock sync.Mutex
+	dbType         DBType
+)
+
+func CacheInit(dt DBType, zoneId uint32, params map[string]interface{}) {
 	dbCacheMapLock.Lock()
 	defer dbCacheMapLock.Unlock()
 
 	dbCacheMap = make(map[string]*ValueInfo)
-	//ssdbInit(cfg)
-	mongoDBInit()
+	SetZoneId(zoneId)
+
+	dbType = dt
+	if dbType == MongoDB {
+		ip, ok1 := params["ip"]
+		port, ok2 := params["port"]
+		dbName, ok3 := params["dbName"]
+		if ok1 == false || ok2 == false || ok3 == false {
+			log.Panic("MongoDb Need ip, port, dbName")
+		}
+		mongoDBInit(ip.(string), port.(uint32), dbName.(string))
+	} else if dbType == SSDB {
+		ip, ok1 := params["ip"]
+		port, ok2 := params["port"]
+		minPoolSize, ok3 := params["minPoolSize"]
+		maxPoolSize, ok4 := params["maxPoolSize"]
+		acqIncrement, ok5 := params["acqIncrement"]
+		if ok1 == false || ok2 == false || ok3 == false || ok4 == false || ok5 == false {
+			log.Panic("SSDB Need ip, port, minPoolSize, maxPoolSize, acqIncrement")
+		}
+		ssdbInit(ip.(string), port.(uint32), minPoolSize.(uint32), maxPoolSize.(uint32), acqIncrement.(uint32))
+	} else {
+		log.Panic("Invalid DB Type:", dbType)
+	}
 
 	go cleanCacheTicker()
 }
@@ -38,8 +69,15 @@ func GetKV(k string) string {
 	info, ok := dbCacheMap[k]
 	if ok == false {
 		info = new(ValueInfo)
-		//info.v = ssdbGetKV(k)
-		info.v = mongoDBGetKV(k)
+
+		if dbType == MongoDB {
+			info.v = mongoDBGetKV(k)
+		} else if dbType == SSDB {
+			info.v = ssdbGetKV(k)
+		} else {
+			log.Panic("Invalid DB Type:", dbType)
+		}
+
 		dbCacheMap[k] = info
 	}
 	info.t = time.Now()
@@ -54,8 +92,14 @@ func SetKV(k, v string) {
 			log.Println("Cache SetKV ", err, " Key:", k, " Value:", v)
 		}
 	}()
-	//ssdbSetKV(k, v)
-	mongoDBUpsertKV(k, v)
+
+	if dbType == MongoDB {
+		mongoDBUpsertKV(k, v)
+	} else if dbType == SSDB {
+		ssdbSetKV(k, v)
+	} else {
+		log.Panic("Invalid DB Type:", dbType)
+	}
 
 	info, ok := dbCacheMap[k]
 	if ok == false {

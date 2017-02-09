@@ -2,7 +2,7 @@ package table
 
 import (
 	"gameproject/common"
-	"gameproject/server/db/cacheMgr"
+	"gameproject/common/cache"
 	"gameproject/server/db/dbProto"
 	"log"
 
@@ -33,7 +33,7 @@ func GetUser(t *common.Trans, k string) *User {
 	}
 	key := "User_" + k
 	t.Lock(key)
-	v := cacheMgr.GetKV(key)
+	v := cache.GetKV(key)
 	if v == "" {
 		return nil
 	}
@@ -61,7 +61,7 @@ func SelectUser(k string) *User {
 	key := "User_" + k
 	common.Lock(key)
 	defer common.Unlock(key)
-	v := cacheMgr.GetKV(key)
+	v := cache.GetKV(key)
 	if v == "" {
 		return nil
 	}
@@ -93,6 +93,6 @@ func (this *User) Save() error {
 	oct := &common.Octets{}
 	oct.MarshalUint32(uint32(len(data)))
 	oct.MarshalBytesOnly(data)
-	cacheMgr.SetKV(this.k, string(oct.GetBuf()))
+	cache.SetKV(this.k, string(oct.GetBuf()))
 	return nil
 }

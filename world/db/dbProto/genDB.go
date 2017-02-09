@@ -50,7 +50,7 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("import (\n")...)
 	content = append(content, []byte("	\"gameproject/common\"\n")...)
-	content = append(content, []byte("	\"gameproject/world/db/cacheMgr\"\n")...)
+	content = append(content, []byte("	\"gameproject/common/cache\"\n")...)
 	content = append(content, []byte("	\"gameproject/world/db/dbProto\"\n")...)
 	content = append(content, []byte("	\"log\"\n")...)
 	switch keyType {
@@ -110,7 +110,7 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 		log.Panic("Unkown Key Type table:", name)
 	}
 	content = append(content, []byte("	t.Lock(key)\n")...)
-	content = append(content, []byte("	v := cacheMgr.GetKV(key)\n")...)
+	content = append(content, []byte("	v := cache.GetKV(key)\n")...)
 	content = append(content, []byte("	if v == \"\" {\n")...)
 	content = append(content, []byte("		return nil\n")...)
 	content = append(content, []byte("	}\n")...)
@@ -149,7 +149,7 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 	}
 	content = append(content, []byte("	common.Lock(key)\n")...)
 	content = append(content, []byte("	defer common.Unlock(key)\n")...)
-	content = append(content, []byte("	v := cacheMgr.GetKV(key)\n")...)
+	content = append(content, []byte("	v := cache.GetKV(key)\n")...)
 	content = append(content, []byte("	if v == \"\" {\n")...)
 	content = append(content, []byte("		return nil\n")...)
 	content = append(content, []byte("	}\n")...)
@@ -181,7 +181,7 @@ func (this *DBMgr) GenTable(name, keyType string, isSave bool) {
 	content = append(content, []byte("	oct := &common.Octets{}\n")...)
 	content = append(content, []byte("	oct.MarshalUint32(uint32(len(data)))\n")...)
 	content = append(content, []byte("	oct.MarshalBytesOnly(data)\n")...)
-	content = append(content, []byte("	cacheMgr.SetKV(this.k, string(oct.GetBuf()))\n")...)
+	content = append(content, []byte("	cache.SetKV(this.k, string(oct.GetBuf()))\n")...)
 	content = append(content, []byte("	return nil\n")...)
 	content = append(content, []byte("}\n")...)
 

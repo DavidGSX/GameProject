@@ -1,23 +1,16 @@
-package manager
+package cache
 
 import (
-	"gameproject/global/config"
 	"log"
 
 	"github.com/DavidGSX/gossdb"
 )
 
-var dbPool *gossdb.Connectors
+var ssdbPool *gossdb.Connectors
 
-func SSDBInit(cfg *config.GlobalConfig) {
-	ip := cfg.BaseConfig.DBIP
-	port := cfg.BaseConfig.DBPort
-	minPoolSize := cfg.BaseConfig.MinPoolSize
-	maxPoolSize := cfg.BaseConfig.MaxPoolSize
-	acqIncrement := cfg.BaseConfig.AcqIncrement
-
+func ssdbInit(ip string, port, minPoolSize, maxPoolSize, acqIncrement uint32) {
 	var err error
-	dbPool, err = gossdb.NewPool(&gossdb.Config{
+	ssdbPool, err = gossdb.NewPool(&gossdb.Config{
 		Host:             ip,
 		Port:             int(port),
 		MinPoolSize:      int(minPoolSize),
@@ -31,17 +24,22 @@ func SSDBInit(cfg *config.GlobalConfig) {
 }
 
 func ssdbSetKV(k, v string) {
-	c, err := dbPool.NewClient()
+	c, err := ssdbPool.NewClient()
 	if err != nil {
 		log.Panic(err)
 	}
-	defer c.Close()
+	defer func() {
+		c.Close()
+		if err := recover(); err != nil {
+			log.Println("DB SetKV ", err, " Key:", k, " Value:", v)
+		}
+	}()
 
 	c.Set(k, v)
 }
 
 func ssdbGetKV(k string) string {
-	c, err := dbPool.NewClient()
+	c, err := ssdbPool.NewClient()
 	if err != nil {
 		log.Panic(err)
 	}
@@ -52,14 +50,4 @@ func ssdbGetKV(k string) string {
 		log.Panic(err)
 	}
 	return v.String()
-}
-
-func ssdbDelKV(k string) {
-	c, err := dbPool.NewClient()
-	if err != nil {
-		log.Panic(err)
-	}
-	defer c.Close()
-
-	c.Del(k)
 }

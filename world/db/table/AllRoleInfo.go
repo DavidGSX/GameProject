@@ -2,7 +2,7 @@ package table
 
 import (
 	"gameproject/common"
-	"gameproject/world/db/cacheMgr"
+	"gameproject/common/cache"
 	"gameproject/world/db/dbProto"
 	"log"
 
@@ -33,7 +33,7 @@ func GetAllRoleInfo(t *common.Trans, k string) *AllRoleInfo {
 	}
 	key := "AllRoleInfo_" + k
 	t.Lock(key)
-	v := cacheMgr.GetKV(key)
+	v := cache.GetKV(key)
 	if v == "" {
 		return nil
 	}
@@ -61,7 +61,7 @@ func SelectAllRoleInfo(k string) *AllRoleInfo {
 	key := "AllRoleInfo_" + k
 	common.Lock(key)
 	defer common.Unlock(key)
-	v := cacheMgr.GetKV(key)
+	v := cache.GetKV(key)
 	if v == "" {
 		return nil
 	}
@@ -93,6 +93,6 @@ func (this *AllRoleInfo) Save() error {
 	oct := &common.Octets{}
 	oct.MarshalUint32(uint32(len(data)))
 	oct.MarshalBytesOnly(data)
-	cacheMgr.SetKV(this.k, string(oct.GetBuf()))
+	cache.SetKV(this.k, string(oct.GetBuf()))
 	return nil
 }

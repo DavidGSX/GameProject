@@ -2,7 +2,7 @@ package main
 
 import (
 	"gameproject/common"
-	"gameproject/server/msgProto"
+	"gameproject/server/client/csproto"
 	"log"
 	"net"
 	"strconv"
@@ -75,18 +75,18 @@ func ConnRead(conn net.Conn, msg proto.Message) (msgType uint32) {
 }
 
 func UserLogin(conn net.Conn, userId, token string) bool {
-	sendInfo := &msgProto.CUserLogin{}
+	sendInfo := &csproto.CUserLogin{}
 	sendInfo.UserId = userId
 	sendInfo.Token = token
 	sendInfo.ZoneId = 1001
-	sendInfo.Platform = msgProto.CUserLogin_IOS
+	sendInfo.Platform = csproto.CUserLogin_IOS
 	ConnSend(conn, 1001, sendInfo)
 
-	recvInfo := &msgProto.SUserLogin{}
+	recvInfo := &csproto.SUserLogin{}
 	ConnRead(conn, recvInfo)
 	//log.Println("MsgType", msgType, " recvInfo:", recvInfo, " UserId:", userId, " Token:", token)
 
-	if recvInfo.GetLoginRes() == msgProto.SUserLogin_SUCCESS {
+	if recvInfo.GetLoginRes() == csproto.SUserLogin_SUCCESS {
 		return true
 	} else {
 		return false
@@ -94,11 +94,11 @@ func UserLogin(conn net.Conn, userId, token string) bool {
 }
 
 func GetRoleId(conn net.Conn, userId string) (roleId uint64) {
-	sendInfo := &msgProto.CRoleList{}
+	sendInfo := &csproto.CRoleList{}
 	sendInfo.SelectRoleId = 0
 	ConnSend(conn, 1003, sendInfo)
 
-	recvInfo := &msgProto.SRoleList{}
+	recvInfo := &csproto.SRoleList{}
 	ConnRead(conn, recvInfo)
 	//log.Println("MsgType", msgType, " recvInfo:", recvInfo)
 
@@ -106,17 +106,17 @@ func GetRoleId(conn net.Conn, userId string) (roleId uint64) {
 		return recvInfo.GetRoles()[0].RoleId
 	} else {
 		//创建角色
-		sendInfo := &msgProto.CCreateRole{}
+		sendInfo := &csproto.CCreateRole{}
 		sendInfo.Name = "robot" + userId
 		sendInfo.School = 1
 		sendInfo.Sex = 2
 		ConnSend(conn, 1005, sendInfo)
 
-		recvInfo := &msgProto.SCreateRole{}
+		recvInfo := &csproto.SCreateRole{}
 		ConnRead(conn, recvInfo)
 		//log.Println("MsgType", msgType, " recvInfo:", recvInfo)
 
-		if recvInfo.Res == msgProto.SCreateRole_SUCCESS {
+		if recvInfo.Res == csproto.SCreateRole_SUCCESS {
 			return recvInfo.Info.RoleId
 		} else {
 			return 0
@@ -126,12 +126,12 @@ func GetRoleId(conn net.Conn, userId string) (roleId uint64) {
 
 func AddMoney(conn net.Conn, roleId uint64, num uint32) {
 	for i := 0; i < 10; i++ {
-		sendInfo := &msgProto.CAddMoney{}
+		sendInfo := &csproto.CAddMoney{}
 		sendInfo.RoleId = roleId
 		sendInfo.Num = num
 		ConnSend(conn, 1007, sendInfo)
 
-		recvInfo := &msgProto.SMoneyInfo{}
+		recvInfo := &csproto.SMoneyInfo{}
 		ConnRead(conn, recvInfo)
 		//log.Println("MsgType", msgType, " recvInfo:", recvInfo)
 	}

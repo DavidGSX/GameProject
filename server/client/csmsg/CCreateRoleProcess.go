@@ -2,8 +2,8 @@ package csmsg
 
 import (
 	"gameproject/common"
+	"gameproject/common/cache"
 	"gameproject/server/client/csproto"
-	"gameproject/server/db/cacheMgr"
 	"gameproject/server/db/table"
 	"gameproject/server/rpcMgr"
 	"log"
@@ -27,7 +27,7 @@ func (this *CCreateRoleProcess) Process() bool {
 	if rpcMgr.NameExist(this.msg.Name) {
 		sendInfo.Res = csproto.SCreateRole_NAME_DUPLICATED
 	} else {
-		rId = cacheMgr.GetNextRoleId()
+		rId = cache.GetNextRoleId()
 		rpcMgr.NameInsert(this.msg.Name)
 		sendInfo.Res = csproto.SCreateRole_SUCCESS
 	}

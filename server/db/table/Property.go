@@ -2,7 +2,7 @@ package table
 
 import (
 	"gameproject/common"
-	"gameproject/server/db/cacheMgr"
+	"gameproject/common/cache"
 	"gameproject/server/db/dbProto"
 	"log"
 	"strconv"
@@ -34,7 +34,7 @@ func GetProperty(t *common.Trans, k uint64) *Property {
 	}
 	key := "Property_" + strconv.FormatUint(k, 10)
 	t.Lock(key)
-	v := cacheMgr.GetKV(key)
+	v := cache.GetKV(key)
 	if v == "" {
 		return nil
 	}
@@ -62,7 +62,7 @@ func SelectProperty(k uint64) *Property {
 	key := "Property_" + strconv.FormatUint(k, 10)
 	common.Lock(key)
 	defer common.Unlock(key)
-	v := cacheMgr.GetKV(key)
+	v := cache.GetKV(key)
 	if v == "" {
 		return nil
 	}
@@ -94,6 +94,6 @@ func (this *Property) Save() error {
 	oct := &common.Octets{}
 	oct.MarshalUint32(uint32(len(data)))
 	oct.MarshalBytesOnly(data)
-	cacheMgr.SetKV(this.k, string(oct.GetBuf()))
+	cache.SetKV(this.k, string(oct.GetBuf()))
 	return nil
 }

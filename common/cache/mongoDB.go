@@ -1,7 +1,8 @@
-package cacheMgr
+package cache
 
 import (
 	"log"
+	"strconv"
 	"strings"
 
 	"gopkg.in/mgo.v2"
@@ -15,24 +16,25 @@ type KV struct {
 
 var (
 	session *mgo.Session
-	dbName  = "test"
+	dbName  string
 )
 
-func mongoDBInit() {
+func mongoDBInit(ip string, port uint32, name string) {
 	if session == nil {
 		var err error
-		session, err = mgo.Dial("localhost")
+		session, err = mgo.Dial(ip + ":" + strconv.Itoa(int(port)))
 		if err != nil {
 			log.Panic(err)
 		}
 		session.SetMode(mgo.Monotonic, true)
 		session.SetPoolLimit(30)
+		dbName = name
 	}
 }
 
 func Session() *mgo.Session {
 	if session == nil {
-		mongoDBInit()
+		log.Panic("session is nil")
 	}
 	return session.Clone()
 }
