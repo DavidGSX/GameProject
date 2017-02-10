@@ -234,3 +234,12 @@ func (this *GlobalConn) GetUserId() string {
 	// just use to adjust interface ISend
 	return ""
 }
+
+func (this *GlobalConn) SetRoleId(r uint64) {
+	// just use to adjust interface ISend
+}
+
+func (this *GlobalConn) GetRoleId() uint64 {
+	// just use to adjust interface ISend
+	return 0
+}

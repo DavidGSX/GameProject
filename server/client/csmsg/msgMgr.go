@@ -17,8 +17,10 @@ type MsgInfo interface {
 	Getl() ISend
 	Setg(s ISend)
 	Getg() ISend
+	Setw(w ISend)
+	Getw() ISend
 	Unmarshal(data []byte) error
-	Send(MsgInfo) error
+	Send2Link(MsgInfo) error
 	Process(t *common.Trans) bool
 }
 
@@ -26,6 +28,8 @@ type ISend interface {
 	Send(x []byte)
 	SetUserId(u string)
 	GetUserId() string
+	SetRoleId(r uint64)
+	GetRoleId() uint64
 }
 
 var MsgInfos map[int]MsgInfo
@@ -38,8 +42,14 @@ func Init() {
 	MsgInfos[1004] = new(SRoleList)
 	MsgInfos[1005] = new(CCreateRole)
 	MsgInfos[1006] = new(SCreateRole)
-	MsgInfos[1007] = new(CAddMoney)
-	MsgInfos[1008] = new(SMoneyInfo)
+	MsgInfos[1007] = new(CEnterWorld)
+	MsgInfos[1008] = new(SEnterWorld)
+	MsgInfos[1009] = new(CAddMoney)
+	MsgInfos[1010] = new(SMoneyInfo)
+	MsgInfos[1011] = new(CAddLevel)
+	MsgInfos[1012] = new(SLevelInfo)
+	MsgInfos[1013] = new(CReqServerRoleInfos)
+	MsgInfos[1014] = new(SServerRoleInfos)
 }
 
 func GetMsg(t int) MsgInfo {
@@ -47,4 +57,16 @@ func GetMsg(t int) MsgInfo {
 		return nil
 	}
 	return MsgInfos[t]
+}
+
+func MarshalMsg(msg MsgInfo) ([]byte, error) {
+	data, err := proto.Marshal(msg.GetMsg())
+	if err != nil {
+		return nil, err
+	}
+	oct := &common.Octets{}
+	oct.MarshalUint32(uint32(len(data)))
+	oct.MarshalUint32(msg.MsgType())
+	oct.MarshalBytesOnly(data)
+	return oct.GetBuf(), nil
 }

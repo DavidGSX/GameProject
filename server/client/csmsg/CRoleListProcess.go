@@ -37,7 +37,7 @@ func (this *CRoleListProcess) Process() bool {
 	} else {
 		sendInfo.PreLoginRoleId = 1
 	}
-	err := this.msg.Send(sendInfo)
+	err := this.msg.Send2Link(sendInfo)
 	if err != nil {
 		log.Panic("CRoleListProcess Send SRoleList error:", err)
 	}

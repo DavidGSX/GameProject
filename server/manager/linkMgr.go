@@ -28,6 +28,31 @@ func GetLinkMgr() *LinkMgr {
 	return linkMgr
 }
 
+func LinkMgrInit(cfg *config.ServerConfig) {
+	ip := cfg.LinkConfig.LinkIP
+	port := cfg.LinkConfig.LinkPort
+	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(int(port)))
+	if err != nil {
+		log.Fatal("Link Listen Error ", err)
+	}
+	log.Println("Link Listen ", ip, port)
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("LinkMgr Exception ", err)
+		}
+	}()
+
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Panic("Link Accept Error ", err)
+		}
+
+		go NewLink(conn).Process()
+	}
+}
+
 func (this *LinkMgr) AddLinkByUserId(userId string, l *Link) {
 	linkMgrLock.Lock()
 	defer linkMgrLock.Unlock()
@@ -51,6 +76,7 @@ func (this *LinkMgr) AddLinkByRoleId(roleId uint64, l *Link) {
 
 	this.roleId2Links[roleId] = l
 }
+
 func (this *LinkMgr) DelLinkByUserId(userId string) {
 	linkMgrLock.Lock()
 	defer linkMgrLock.Unlock()
@@ -89,27 +115,18 @@ func (this *LinkMgr) GetLinkByRoleId(roleId uint64) *Link {
 	}
 }
 
-func LinkMgrInit(cfg *config.ServerConfig) {
-	ip := cfg.LinkConfig.LinkIP
-	port := cfg.LinkConfig.LinkPort
-	l, err := net.Listen("tcp", ip+":"+strconv.Itoa(int(port)))
-	if err != nil {
-		log.Fatal("Link Listen Error ", err)
-	}
-	log.Println("Link Listen ", ip, port)
-
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println("LinkMgr Exception ", err)
+func (this *LinkMgr) SendByRoleIds(roleIds []uint64, b []byte) {
+	if len(roleIds) == 0 {
+		for _, l := range this.roleId2Links {
+			l.Send(b)
 		}
-	}()
-
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			log.Panic("Link Accept Error ", err)
+	} else {
+		for _, r := range roleIds {
+			if this.GetLinkByRoleId(r) == nil {
+				log.Println("Role not Connect to Server, RoleId:", r)
+			} else {
+				this.GetLinkByRoleId(r).Send(b)
+			}
 		}
-
-		go NewLink(conn).Process()
 	}
 }

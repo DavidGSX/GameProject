@@ -48,7 +48,7 @@ func (this *MsgMgr) Check() {
 	}
 }
 
-func (this *MsgMgr) Gen() {
+func (this *MsgMgr) Gen(pkg, fPath string, flag byte) {
 	types := make([]int, 0)
 	for k, _ := range this.Type2Name {
 		types = append(types, k)
@@ -56,7 +56,7 @@ func (this *MsgMgr) Gen() {
 	sort.Ints(types)
 
 	content := make([]byte, 0)
-	content = append(content, []byte("package message\n")...)
+	content = append(content, []byte("package "+pkg+"\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("import (\n")...)
 	content = append(content, []byte("	\"gameproject/common\"\n")...)
@@ -79,6 +79,7 @@ func (this *MsgMgr) Gen() {
 	content = append(content, []byte("type ISend interface {\n")...)
 	content = append(content, []byte("	Send(b []byte)\n")...)
 	content = append(content, []byte("	SendByZoneIds(zoneIds []uint32, b []byte)\n")...)
+	content = append(content, []byte("	SendByRoleIds(roleIds []uint64, b []byte)\n")...)
 	content = append(content, []byte("	SetZoneId(z uint32)\n")...)
 	content = append(content, []byte("	GetZoneId() uint32\n")...)
 	content = append(content, []byte("}\n")...)
@@ -102,8 +103,8 @@ func (this *MsgMgr) Gen() {
 	for _, k := range types {
 		v := this.Type2Name[k]
 		content = append(content, []byte("	MsgInfos["+strconv.Itoa(k)+"] = new("+v+")\n")...)
-		this.GenMsgInfo(v)
-		GenMsgProcess(v)
+		this.GenMsgInfo(pkg, fPath, v, flag)
+		GenMsgProcess(pkg, fPath, v, flag)
 	}
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
@@ -114,15 +115,15 @@ func (this *MsgMgr) Gen() {
 	content = append(content, []byte("	return MsgInfos[t]\n")...)
 	content = append(content, []byte("}\n")...)
 
-	err := ioutil.WriteFile("../message/msgMgr.go", content, 0666)
+	err := ioutil.WriteFile(fPath+"msgMgr.go", content, 0666)
 	if err != nil {
 		log.Panic("Write MsgMgr.go Error:", err)
 	}
 }
 
-func (this *MsgMgr) GenMsgInfo(name string) {
+func (this *MsgMgr) GenMsgInfo(pkg, fPath, name string, flag byte) {
 	content := make([]byte, 0)
-	content = append(content, []byte("package message\n")...)
+	content = append(content, []byte("package "+pkg+"\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("import (\n")...)
 	content = append(content, []byte("	\"gameproject/common\"\n")...)
@@ -181,7 +182,7 @@ func (this *MsgMgr) GenMsgInfo(name string) {
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("func (this *"+name+") Process(t *common.Trans) bool {\n")...)
-	if len(name) > 0 && name[0] == 'W' {
+	if len(name) > 0 && name[0] == flag {
 		content = append(content, []byte("	// do nothing\n")...)
 		content = append(content, []byte("	return false\n")...)
 	} else {
@@ -192,28 +193,28 @@ func (this *MsgMgr) GenMsgInfo(name string) {
 	}
 	content = append(content, []byte("}\n")...)
 
-	filename := "../message/" + name + ".go"
+	filename := fPath + name + ".go"
 	err := ioutil.WriteFile(filename, content, 0666)
 	if err != nil {
 		log.Panic("Write "+name+".go Error:", err)
 	}
 }
 
-func GenMsgProcess(name string) {
-	// S开头的协议不用生成Process文件
-	if len(name) > 0 && name[0] == 'W' {
+func GenMsgProcess(pkg, fPath, name string, flag byte) {
+	// flag开头的协议不用生成Process文件
+	if len(name) > 0 && name[0] == flag {
 		return
 	}
 
 	// 文件存在，可能有写具体的处理逻辑，生成代码会覆盖，所以直接返回
-	filename := "../message/" + name + "Process.go"
+	filename := fPath + name + "Process.go"
 	_, err := os.Stat(filename)
 	if err == nil || os.IsNotExist(err) == false {
 		return
 	}
 
 	content := make([]byte, 0)
-	content = append(content, []byte("package message\n")...)
+	content = append(content, []byte("package "+pkg+"\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("import (\n")...)
 	content = append(content, []byte("	\"gameproject/common\"\n")...)
@@ -260,5 +261,6 @@ func main() {
 
 	msgMgr.Show()
 	msgMgr.Check()
-	msgMgr.Gen()
+	msgMgr.Gen("message", "../message/", 'W')
+	msgMgr.Gen("swmsg", "../../server/world/swmsg/", 'S')
 }

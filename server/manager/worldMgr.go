@@ -3,6 +3,7 @@ package manager
 import (
 	"gameproject/common"
 	"gameproject/server/config"
+	"gameproject/server/world/swmsg"
 	"gameproject/world/msgProto"
 	"log"
 	"net"
@@ -143,15 +144,17 @@ func (this *WorldConn) OnReceive() {
 		}
 		data := oct.UnmarshalBytesOnly(size)
 
-		switch msgType {
-		case 102:
-			this.OnRegisted(data)
-		default:
-			// 如果协议错误，就清空接受缓冲区
-			log.Println("Invalid Msg Type:", msgType)
-			this.recvBuf = make([]byte, 0)
-			return
+		msg := swmsg.GetMsg(int(msgType))
+		if msg == nil {
+			log.Panic("Unknow Protocol Type:", msgType)
 		}
+		msg = msg.Clone()
+		err = msg.Unmarshal(data)
+		if err != nil {
+			log.Panic("Unmarshal Protocol Error:", err, " Type:", msgType)
+		}
+		msg.Sets(this)
+		common.NewTrans().Process(msg)
 
 		this.recvBuf = this.recvBuf[oct.Pos():]
 	}
@@ -195,6 +198,10 @@ func (this *WorldConn) Send(x []byte) {
 	this.sendBuf = append(this.sendBuf, x...)
 }
 
+func (this *WorldConn) SendByRoleIds(roleIds []uint64, b []byte) {
+	GetLinkMgr().SendByRoleIds(roleIds, b)
+}
+
 func (this *WorldConn) SetUserId(u string) {
 	// just use to adjust interface ISend
 }
@@ -202,4 +209,26 @@ func (this *WorldConn) SetUserId(u string) {
 func (this *WorldConn) GetUserId() string {
 	// just use to adjust interface ISend
 	return ""
+}
+
+func (this *WorldConn) SetRoleId(r uint64) {
+	// just use to adjust interface ISend
+}
+
+func (this *WorldConn) GetRoleId() uint64 {
+	// just use to adjust interface ISend
+	return 0
+}
+
+func (this *WorldConn) SetZoneId(r uint32) {
+	// just use to adjust interface ISend
+}
+
+func (this *WorldConn) GetZoneId() uint32 {
+	// just use to adjust interface ISend
+	return 0
+}
+
+func (this *WorldConn) SendByZoneIds(zoneIds []uint32, b []byte) {
+	// just use to adjust interface ISend
 }

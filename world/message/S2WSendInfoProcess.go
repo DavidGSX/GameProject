@@ -23,12 +23,10 @@ func (this *S2WSendInfoProcess) Process() bool {
 	sendInfo.Type = this.msg.Type
 	sendInfo.Info = this.msg.Info
 
-	zoneIds := make([]uint32, 0)
-	zoneIds = append(zoneIds, sendInfo.ZoneId)
 	err, data := GetMsgByte(sendInfo)
 	if err != nil {
 		log.Panic("S2WSendInfoProcess GetMsgByte W2SSendInfo error:", err)
 	}
-	this.msg.Gets().SendByZoneIds(zoneIds, data)
+	this.msg.Gets().SendByZoneIds([]uint32{sendInfo.ZoneId}, data)
 	return true
 }

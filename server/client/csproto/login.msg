@@ -26,11 +26,35 @@
 		},
 		{
 			"MsgType" : 1007,
-			"MsgName" : "CAddMoney"
+			"MsgName" : "CEnterWorld"
 		},
 		{
 			"MsgType" : 1008,
+			"MsgName" : "SEnterWorld"
+		},
+		{
+			"MsgType" : 1009,
+			"MsgName" : "CAddMoney"
+		},
+		{
+			"MsgType" : 1010,
 			"MsgName" : "SMoneyInfo"
+		},
+		{
+			"MsgType" : 1011,
+			"MsgName" : "CAddLevel"
+		},
+		{
+			"MsgType" : 1012,
+			"MsgName" : "SLevelInfo"
+		},
+		{
+			"MsgType" : 1013,
+			"MsgName" : "CReqServerRoleInfos"
+		},
+		{
+			"MsgType" : 1014,
+			"MsgName" : "SServerRoleInfos"
 		}
 	]
 }

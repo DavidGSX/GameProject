@@ -11,6 +11,7 @@ type CRoleList struct {
 	csproto.CRoleList
 	l ISend  // Link缩写
 	g ISend  // Global缩写
+	w ISend  // World缩写
 	r uint64 // RoleId缩写
 }
 
@@ -51,21 +52,25 @@ func (this *CRoleList) Getg() ISend {
 	return this.g
 }
 
+func (this *CRoleList) Setw(w ISend) {
+	this.w = w
+}
+
+func (this *CRoleList) Getw() ISend {
+	return this.w
+}
+
 func (this *CRoleList) Unmarshal(data []byte) error {
 	err := proto.Unmarshal(data, &this.CRoleList)
 	return err
 }
 
-func (this *CRoleList) Send(msg MsgInfo) error {
-	data, err := proto.Marshal(msg.GetMsg())
+func (this *CRoleList) Send2Link(msg MsgInfo) error {
+	data, err := MarshalMsg(msg)
 	if err != nil {
 		return err
 	}
-	oct := &common.Octets{}
-	oct.MarshalUint32(uint32(len(data)))
-	oct.MarshalUint32(msg.MsgType())
-	oct.MarshalBytesOnly(data)
-	this.Getl().Send(oct.GetBuf())
+	this.Getl().Send(data)
 	return nil
 }
 

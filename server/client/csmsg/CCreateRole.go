@@ -11,6 +11,7 @@ type CCreateRole struct {
 	csproto.CCreateRole
 	l ISend  // Link缩写
 	g ISend  // Global缩写
+	w ISend  // World缩写
 	r uint64 // RoleId缩写
 }
 
@@ -51,21 +52,25 @@ func (this *CCreateRole) Getg() ISend {
 	return this.g
 }
 
+func (this *CCreateRole) Setw(w ISend) {
+	this.w = w
+}
+
+func (this *CCreateRole) Getw() ISend {
+	return this.w
+}
+
 func (this *CCreateRole) Unmarshal(data []byte) error {
 	err := proto.Unmarshal(data, &this.CCreateRole)
 	return err
 }
 
-func (this *CCreateRole) Send(msg MsgInfo) error {
-	data, err := proto.Marshal(msg.GetMsg())
+func (this *CCreateRole) Send2Link(msg MsgInfo) error {
+	data, err := MarshalMsg(msg)
 	if err != nil {
 		return err
 	}
-	oct := &common.Octets{}
-	oct.MarshalUint32(uint32(len(data)))
-	oct.MarshalUint32(msg.MsgType())
-	oct.MarshalBytesOnly(data)
-	this.Getl().Send(oct.GetBuf())
+	this.Getl().Send(data)
 	return nil
 }
 

@@ -47,6 +47,18 @@ func (this *Link) GetUserId() string {
 	return this.userId
 }
 
+func (this *Link) SetRoleId(r uint64) {
+	if this.roleId != 0 && this.roleId != r {
+		log.Println("SetRoleId old:", this.roleId, " new:", r)
+	}
+	this.roleId = r
+	GetLinkMgr().AddLinkByRoleId(r, this)
+}
+
+func (this *Link) GetRoleId() uint64 {
+	return this.roleId
+}
+
 func (this *Link) SetAuthored() {
 	this.authored = true
 }
@@ -54,6 +66,7 @@ func (this *Link) SetAuthored() {
 func (this *Link) Process() {
 	log.Println("Link connected ", this.conn.RemoteAddr().String())
 	defer func() {
+		OnUserLogout(this.userId, this.roleId)
 		log.Println("Link disconnected", this.roleId, this.conn.RemoteAddr().String())
 		this.Close()
 		if err := recover(); err != nil {
@@ -124,6 +137,7 @@ func (this *Link) OnReceive() {
 		msg.Setr(this.roleId)
 		msg.Setl(this)
 		msg.Setg(GetGlobalConn())
+		msg.Setw(GetWorldConn())
 		common.NewTrans().Process(msg)
 
 		this.recvBuf = this.recvBuf[oct.Pos():]

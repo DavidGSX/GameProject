@@ -31,7 +31,10 @@ func Robot(ch chan int, userId, token string) {
 	if UserLogin(conn, userId, token) == true {
 		roleId := GetRoleId(conn, userId)
 		if roleId > 0 {
-			AddMoney(conn, roleId, 1)
+			EnterWorld(conn, roleId)
+			AddMoney(conn, 1)
+			AddLevel(conn, 2)
+			ReqServerRole(conn)
 		} else {
 			log.Println("UserId:", userId, " GetRoleId Failed!")
 		}
@@ -124,15 +127,43 @@ func GetRoleId(conn net.Conn, userId string) (roleId uint64) {
 	}
 }
 
-func AddMoney(conn net.Conn, roleId uint64, num uint32) {
+func EnterWorld(conn net.Conn, roleId uint64) {
+	sendInfo := &csproto.CEnterWorld{}
+	sendInfo.RoleId = roleId
+	ConnSend(conn, 1007, sendInfo)
+
+	recvInfo := &csproto.SEnterWorld{}
+	ConnRead(conn, recvInfo)
+	//log.Println("MsgType", msgType, " recvInfo:", recvInfo)
+}
+
+func AddMoney(conn net.Conn, num uint32) {
 	for i := 0; i < 10; i++ {
 		sendInfo := &csproto.CAddMoney{}
-		sendInfo.RoleId = roleId
 		sendInfo.Num = num
-		ConnSend(conn, 1007, sendInfo)
+		ConnSend(conn, 1009, sendInfo)
 
 		recvInfo := &csproto.SMoneyInfo{}
 		ConnRead(conn, recvInfo)
 		//log.Println("MsgType", msgType, " recvInfo:", recvInfo)
 	}
+}
+
+func AddLevel(conn net.Conn, num uint32) {
+	sendInfo := &csproto.CAddLevel{}
+	sendInfo.Num = num
+	ConnSend(conn, 1011, sendInfo)
+
+	recvInfo := &csproto.SLevelInfo{}
+	ConnRead(conn, recvInfo)
+	//log.Println("MsgType", msgType, " recvInfo:", recvInfo)
+}
+
+func ReqServerRole(conn net.Conn) {
+	sendInfo := &csproto.CReqServerRoleInfos{}
+	ConnSend(conn, 1013, sendInfo)
+
+	recvInfo := &csproto.SServerRoleInfos{}
+	ConnRead(conn, recvInfo)
+	//log.Println("MsgType", msgType, " recvInfo:", recvInfo)
 }

@@ -6,32 +6,32 @@ import (
 	"log"
 )
 
-type CAddMoneyProcess struct {
-	msg   *CAddMoney
+type CAddLevelProcess struct {
+	msg   *CAddLevel
 	trans *common.Trans
 }
 
-func (this *CAddMoneyProcess) Process() bool {
+func (this *CAddLevelProcess) Process() bool {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println("CAddMoneyProcess Error:", err)
+			log.Println("CAddLevelProcess Error:", err)
 		}
 	}()
 
-	sendInfo := &SMoneyInfo{}
+	sendInfo := &SLevelInfo{}
 	roleId := this.msg.Getr()
 
 	v := table.GetProperty(this.trans, roleId)
 	if v == nil {
-		log.Panic("CAddMoneyProcess Role Not Exist RoleId:", roleId)
+		log.Panic("CAddLevelProcess Role Not Exist RoleId:", roleId)
 	} else {
-		v.Money += this.msg.Num
+		v.Level += this.msg.Num
 	}
 
-	sendInfo.Money = v.Money
+	sendInfo.Level = v.Level
 	err := this.msg.Send2Link(sendInfo)
 	if err != nil {
-		log.Panic("CAddMoneyProcess Send SMoneyInfo error:", err)
+		log.Panic("CAddLevelProcess Send SLevelInfo error:", err)
 	}
 	return true
 }

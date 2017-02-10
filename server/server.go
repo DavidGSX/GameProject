@@ -7,6 +7,7 @@ import (
 	"gameproject/server/config"
 	"gameproject/server/manager"
 	"gameproject/server/rpcMgr"
+	"gameproject/server/world/swmsg"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -31,6 +32,7 @@ func main() {
 
 	// 服务器协议初始化
 	csmsg.Init()
+	swmsg.Init()
 
 	// 数据缓存和数据库连接池初始化
 	params := make(map[string]interface{}, 0)

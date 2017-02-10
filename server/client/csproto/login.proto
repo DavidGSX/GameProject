@@ -63,12 +63,44 @@ message SCreateRole {
 	SRoleList.RoleInfo info = 2;
 }
 
-message CAddMoney {
+message CEnterWorld {
 	uint64 roleId = 1;
-	uint32 num = 2;
+}
+
+message SEnterWorld {
+	uint64 roleId = 1;
+}
+
+message CAddMoney {
+	uint32 num = 1;
 }
 
 message SMoneyInfo {
+	uint32 money = 1;
+}
+
+message CAddLevel {
+	uint32 num = 1;
+}
+
+message SLevelInfo {
+	uint32 level = 1;
+}
+
+message CReqServerRoleInfos {
+}
+
+message SServerRoleInfos {
+	message RoleInfo {
+		uint32 zoneId = 1;
+		uint64 roleId = 2;
+		string roleName = 3;
+		uint32 level = 4;
+		uint32 school = 5;
+		uint32 sex = 6;
+		uint64 lasttime = 7;
+	}
+
 	uint64 roleId = 1;
-	uint32 total = 2;
+	repeated RoleInfo info = 2;	
 }

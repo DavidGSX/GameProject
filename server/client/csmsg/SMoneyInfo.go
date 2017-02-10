@@ -11,6 +11,7 @@ type SMoneyInfo struct {
 	csproto.SMoneyInfo
 	l ISend  // Link缩写
 	g ISend  // Global缩写
+	w ISend  // World缩写
 	r uint64 // RoleId缩写
 }
 
@@ -19,7 +20,7 @@ func (this *SMoneyInfo) Clone() MsgInfo {
 }
 
 func (this *SMoneyInfo) MsgType() uint32 {
-	return 1008
+	return 1010
 }
 
 func (this *SMoneyInfo) GetMsg() proto.Message {
@@ -51,21 +52,25 @@ func (this *SMoneyInfo) Getg() ISend {
 	return this.g
 }
 
+func (this *SMoneyInfo) Setw(w ISend) {
+	this.w = w
+}
+
+func (this *SMoneyInfo) Getw() ISend {
+	return this.w
+}
+
 func (this *SMoneyInfo) Unmarshal(data []byte) error {
 	err := proto.Unmarshal(data, &this.SMoneyInfo)
 	return err
 }
 
-func (this *SMoneyInfo) Send(msg MsgInfo) error {
-	data, err := proto.Marshal(msg.GetMsg())
+func (this *SMoneyInfo) Send2Link(msg MsgInfo) error {
+	data, err := MarshalMsg(msg)
 	if err != nil {
 		return err
 	}
-	oct := &common.Octets{}
-	oct.MarshalUint32(uint32(len(data)))
-	oct.MarshalUint32(msg.MsgType())
-	oct.MarshalBytesOnly(data)
-	this.Getl().Send(oct.GetBuf())
+	this.Getl().Send(data)
 	return nil
 }
 

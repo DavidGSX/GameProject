@@ -156,3 +156,7 @@ func (this *Server) Send(b []byte) {
 func (this *Server) SendByZoneIds(zoneIds []uint32, b []byte) {
 	GetServerMgr().SendByZoneIds(zoneIds, b)
 }
+
+func (this *Server) SendByRoleIds(roleIds []uint64, b []byte) {
+	// just use to adjust interface ISend
+}

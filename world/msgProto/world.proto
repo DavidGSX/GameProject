@@ -38,17 +38,16 @@ message W2SBroadcast {
 
 message S2WRoleInfoChange {
 	message RoleInfo {
-		uint64 roleId = 1;
-		string roleName = 2;
-		uint32 level = 3;
-		uint32 school = 4;
-		uint32 sex = 5;
-		uint64 lasttime = 6;
+		uint32 zoneId = 1;
+		uint64 roleId = 2;
+		string roleName = 3;
+		uint32 level = 4;
+		uint32 school = 5;
+		uint32 sex = 6;
+		uint64 lasttime = 7;
 	}
-	uint32 zoneId = 1;
-	string userId = 2;
-	uint64 roleId = 3;
-	RoleInfo info = 4;
+	string userId = 1;
+	RoleInfo info = 2;
 }
 
 message S2WRoleInfoRequest {

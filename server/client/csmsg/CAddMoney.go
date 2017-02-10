@@ -11,6 +11,7 @@ type CAddMoney struct {
 	csproto.CAddMoney
 	l ISend  // Link缩写
 	g ISend  // Global缩写
+	w ISend  // World缩写
 	r uint64 // RoleId缩写
 }
 
@@ -19,7 +20,7 @@ func (this *CAddMoney) Clone() MsgInfo {
 }
 
 func (this *CAddMoney) MsgType() uint32 {
-	return 1007
+	return 1009
 }
 
 func (this *CAddMoney) GetMsg() proto.Message {
@@ -51,21 +52,25 @@ func (this *CAddMoney) Getg() ISend {
 	return this.g
 }
 
+func (this *CAddMoney) Setw(w ISend) {
+	this.w = w
+}
+
+func (this *CAddMoney) Getw() ISend {
+	return this.w
+}
+
 func (this *CAddMoney) Unmarshal(data []byte) error {
 	err := proto.Unmarshal(data, &this.CAddMoney)
 	return err
 }
 
-func (this *CAddMoney) Send(msg MsgInfo) error {
-	data, err := proto.Marshal(msg.GetMsg())
+func (this *CAddMoney) Send2Link(msg MsgInfo) error {
+	data, err := MarshalMsg(msg)
 	if err != nil {
 		return err
 	}
-	oct := &common.Octets{}
-	oct.MarshalUint32(uint32(len(data)))
-	oct.MarshalUint32(msg.MsgType())
-	oct.MarshalBytesOnly(data)
-	this.Getl().Send(oct.GetBuf())
+	this.Getl().Send(data)
 	return nil
 }
 

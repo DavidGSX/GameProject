@@ -24,18 +24,18 @@ func (this *S2WRoleInfoChangeProcess) Process() bool {
 		vall = table.NewAllRoleInfo(this.trans, this.msg.UserId)
 	}
 
-	vzone := vall.GetZoneId2Info()
-	vrole, okr := vzone[this.msg.ZoneId]
+	vrole, okr := vall.ZoneId2Info[this.msg.Info.ZoneId]
 	if okr == false {
 		vrole = &dbProto.AllRoleInfo_ServerRoleInfo{}
-		vzone[this.msg.ZoneId] = vrole
+		vall.ZoneId2Info = make(map[uint32]*dbProto.AllRoleInfo_ServerRoleInfo)
+		vall.ZoneId2Info[this.msg.Info.ZoneId] = vrole
 	}
 
-	vinfo := vrole.GetRoleId2Info()
-	info, oki := vinfo[this.msg.RoleId]
+	info, oki := vrole.RoleId2Info[this.msg.Info.RoleId]
 	if oki == false {
 		info = &dbProto.AllRoleInfo_RoleInfo{}
-		vinfo[this.msg.RoleId] = info
+		vrole.RoleId2Info = make(map[uint64]*dbProto.AllRoleInfo_RoleInfo)
+		vrole.RoleId2Info[this.msg.Info.RoleId] = info
 	}
 
 	info.RoleName = this.msg.Info.RoleName

@@ -58,7 +58,7 @@ func (this *CCreateRoleProcess) Process() bool {
 	sendInfo.Info.Level = 1
 	sendInfo.Info.School = this.msg.School
 	sendInfo.Info.ShowFashion = true
-	err := this.msg.Send(sendInfo)
+	err := this.msg.Send2Link(sendInfo)
 	if err != nil {
 		log.Panic("CCreateRoleProcess Send SCreateRole error:", err)
 	}
