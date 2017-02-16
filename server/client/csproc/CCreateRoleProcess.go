@@ -1,9 +1,11 @@
-package csmsg
+package csproc
 
 import (
 	"gameproject/common"
 	"gameproject/common/cache"
+	"gameproject/server/client/csmsg"
 	"gameproject/server/client/csproto"
+	"gameproject/server/client/msgMgr"
 	"gameproject/server/db/table"
 	"gameproject/server/rpcMgr"
 	"log"
@@ -11,8 +13,20 @@ import (
 )
 
 type CCreateRoleProcess struct {
-	msg   *CCreateRole
+	msg   *csmsg.CCreateRole
 	trans *common.Trans
+}
+
+func (this *CCreateRoleProcess) Clone() msgMgr.IProcess {
+	return new(CCreateRoleProcess)
+}
+
+func (this *CCreateRoleProcess) SetMsg(m msgMgr.MsgInfo) {
+	this.msg = m.(*csmsg.CCreateRole)
+}
+
+func (this *CCreateRoleProcess) SetTrans(t *common.Trans) {
+	this.trans = t
 }
 
 func (this *CCreateRoleProcess) Process() bool {
@@ -22,7 +36,7 @@ func (this *CCreateRoleProcess) Process() bool {
 		}
 	}()
 
-	sendInfo := &SCreateRole{}
+	sendInfo := &csmsg.SCreateRole{}
 	var rId uint64
 	if rpcMgr.NameExist(this.msg.Name) {
 		sendInfo.Res = csproto.SCreateRole_NAME_DUPLICATED

@@ -1,14 +1,28 @@
-package csmsg
+package csproc
 
 import (
 	"gameproject/common"
+	"gameproject/server/client/csmsg"
+	"gameproject/server/client/msgMgr"
 	"gameproject/server/db/table"
 	"log"
 )
 
 type CAddMoneyProcess struct {
-	msg   *CAddMoney
+	msg   *csmsg.CAddMoney
 	trans *common.Trans
+}
+
+func (this *CAddMoneyProcess) Clone() msgMgr.IProcess {
+	return new(CAddMoneyProcess)
+}
+
+func (this *CAddMoneyProcess) SetMsg(m msgMgr.MsgInfo) {
+	this.msg = m.(*csmsg.CAddMoney)
+}
+
+func (this *CAddMoneyProcess) SetTrans(t *common.Trans) {
+	this.trans = t
 }
 
 func (this *CAddMoneyProcess) Process() bool {
@@ -18,7 +32,7 @@ func (this *CAddMoneyProcess) Process() bool {
 		}
 	}()
 
-	sendInfo := &SMoneyInfo{}
+	sendInfo := &csmsg.SMoneyInfo{}
 	roleId := this.msg.Getr()
 
 	v := table.GetProperty(this.trans, roleId)

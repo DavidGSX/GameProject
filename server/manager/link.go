@@ -2,7 +2,7 @@ package manager
 
 import (
 	"gameproject/common"
-	"gameproject/server/client/csmsg"
+	"gameproject/server/client/msgMgr"
 	"log"
 	"net"
 	"sync"
@@ -125,11 +125,10 @@ func (this *Link) OnReceive() {
 		if msgType != 1001 && (this.authored == false || len(this.userId) == 0) {
 			log.Panic("Link is not authored, Message Type:", msgType)
 		}
-		msg := csmsg.GetMsg(int(msgType))
+		msg := msgMgr.GetMsg(int(msgType))
 		if msg == nil {
 			log.Panic("Unknow Protocol Type:", msgType)
 		}
-		msg = msg.Clone()
 		err = msg.Unmarshal(data)
 		if err != nil {
 			log.Panic("Unmarshal Protocol Error:", err, " Type:", msgType)

@@ -1,16 +1,30 @@
-package csmsg
+package csproc
 
 import (
 	"gameproject/common"
 	"gameproject/global/protocol"
+	"gameproject/server/client/csmsg"
+	"gameproject/server/client/msgMgr"
 	"log"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type CUserLoginProcess struct {
-	msg   *CUserLogin
+	msg   *csmsg.CUserLogin
 	trans *common.Trans
+}
+
+func (this *CUserLoginProcess) Clone() msgMgr.IProcess {
+	return new(CUserLoginProcess)
+}
+
+func (this *CUserLoginProcess) SetMsg(m msgMgr.MsgInfo) {
+	this.msg = m.(*csmsg.CUserLogin)
+}
+
+func (this *CUserLoginProcess) SetTrans(t *common.Trans) {
+	this.trans = t
 }
 
 func (this *CUserLoginProcess) Process() bool {

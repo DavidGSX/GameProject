@@ -1,7 +1,8 @@
-package csmsg
+package msgMgr
 
 import (
 	"gameproject/common"
+	"log"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -34,29 +35,21 @@ type ISend interface {
 
 var MsgInfos map[int]MsgInfo
 
-func Init() {
-	MsgInfos = make(map[int]MsgInfo)
-	MsgInfos[1001] = new(CUserLogin)
-	MsgInfos[1002] = new(SUserLogin)
-	MsgInfos[1003] = new(CRoleList)
-	MsgInfos[1004] = new(SRoleList)
-	MsgInfos[1005] = new(CCreateRole)
-	MsgInfos[1006] = new(SCreateRole)
-	MsgInfos[1007] = new(CEnterWorld)
-	MsgInfos[1008] = new(SEnterWorld)
-	MsgInfos[1009] = new(CAddMoney)
-	MsgInfos[1010] = new(SMoneyInfo)
-	MsgInfos[1011] = new(CAddLevel)
-	MsgInfos[1012] = new(SLevelInfo)
-	MsgInfos[1013] = new(CReqServerRoleInfos)
-	MsgInfos[1014] = new(SServerRoleInfos)
+func AddMsg(t int, msg MsgInfo) {
+	if MsgInfos == nil {
+		MsgInfos = make(map[int]MsgInfo)
+	}
+	if _, ok := MsgInfos[t]; ok {
+		log.Panic("Duplicate Msg Type", t)
+	}
+	MsgInfos[t] = msg
 }
 
 func GetMsg(t int) MsgInfo {
 	if MsgInfos == nil {
 		return nil
 	}
-	return MsgInfos[t]
+	return MsgInfos[t].Clone()
 }
 
 func MarshalMsg(msg MsgInfo) ([]byte, error) {
@@ -70,3 +63,30 @@ func MarshalMsg(msg MsgInfo) ([]byte, error) {
 	oct.MarshalBytesOnly(data)
 	return oct.GetBuf(), nil
 }
+
+type IProcess interface {
+	Clone() IProcess
+	SetMsg(m MsgInfo)
+	SetTrans(t *common.Trans)
+	Process() bool
+}
+
+var ProcInfos map[string]IProcess
+
+func AddProc(s string, p IProcess) {
+	if ProcInfos == nil {
+		ProcInfos = make(map[string]IProcess)
+	}
+	if _, ok := ProcInfos[s]; ok {
+		log.Panic("Duplicate Proc Type", s)
+	}
+	ProcInfos[s] = p
+}
+
+func GetProc(s string) IProcess {
+	if ProcInfos == nil {
+		return nil
+	}
+	return ProcInfos[s].Clone()
+}
+

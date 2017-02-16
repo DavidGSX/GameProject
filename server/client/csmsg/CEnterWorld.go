@@ -3,19 +3,20 @@ package csmsg
 import (
 	"gameproject/common"
 	"gameproject/server/client/csproto"
+	"gameproject/server/client/msgMgr"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type CEnterWorld struct {
 	csproto.CEnterWorld
-	l ISend  // Link缩写
-	g ISend  // Global缩写
-	w ISend  // World缩写
+	l msgMgr.ISend  // Link缩写
+	g msgMgr.ISend  // Global缩写
+	w msgMgr.ISend  // World缩写
 	r uint64 // RoleId缩写
 }
 
-func (this *CEnterWorld) Clone() MsgInfo {
+func (this *CEnterWorld) Clone() msgMgr.MsgInfo {
 	return new(CEnterWorld)
 }
 
@@ -36,27 +37,27 @@ func (this *CEnterWorld) Getr() uint64 {
 	return this.r
 }
 
-func (this *CEnterWorld) Setl(s ISend) {
+func (this *CEnterWorld) Setl(s msgMgr.ISend) {
 	this.l = s
 }
 
-func (this *CEnterWorld) Getl() ISend {
+func (this *CEnterWorld) Getl() msgMgr.ISend {
 	return this.l
 }
 
-func (this *CEnterWorld) Setg(s ISend) {
+func (this *CEnterWorld) Setg(s msgMgr.ISend) {
 	this.g = s
 }
 
-func (this *CEnterWorld) Getg() ISend {
+func (this *CEnterWorld) Getg() msgMgr.ISend {
 	return this.g
 }
 
-func (this *CEnterWorld) Setw(w ISend) {
+func (this *CEnterWorld) Setw(w msgMgr.ISend) {
 	this.w = w
 }
 
-func (this *CEnterWorld) Getw() ISend {
+func (this *CEnterWorld) Getw() msgMgr.ISend {
 	return this.w
 }
 
@@ -65,8 +66,8 @@ func (this *CEnterWorld) Unmarshal(data []byte) error {
 	return err
 }
 
-func (this *CEnterWorld) Send2Link(msg MsgInfo) error {
-	data, err := MarshalMsg(msg)
+func (this *CEnterWorld) Send2Link(msg msgMgr.MsgInfo) error {
+	data, err := msgMgr.MarshalMsg(msg)
 	if err != nil {
 		return err
 	}
@@ -75,8 +76,8 @@ func (this *CEnterWorld) Send2Link(msg MsgInfo) error {
 }
 
 func (this *CEnterWorld) Process(t *common.Trans) bool {
-	p := new(CEnterWorldProcess)
-	p.msg = this
-	p.trans = t
+	p := msgMgr.GetProc("CEnterWorld")
+	p.SetMsg(this)
+	p.SetTrans(t)
 	return p.Process()
 }

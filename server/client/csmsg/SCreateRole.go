@@ -3,19 +3,20 @@ package csmsg
 import (
 	"gameproject/common"
 	"gameproject/server/client/csproto"
+	"gameproject/server/client/msgMgr"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type SCreateRole struct {
 	csproto.SCreateRole
-	l ISend  // Link缩写
-	g ISend  // Global缩写
-	w ISend  // World缩写
+	l msgMgr.ISend  // Link缩写
+	g msgMgr.ISend  // Global缩写
+	w msgMgr.ISend  // World缩写
 	r uint64 // RoleId缩写
 }
 
-func (this *SCreateRole) Clone() MsgInfo {
+func (this *SCreateRole) Clone() msgMgr.MsgInfo {
 	return new(SCreateRole)
 }
 
@@ -36,27 +37,27 @@ func (this *SCreateRole) Getr() uint64 {
 	return this.r
 }
 
-func (this *SCreateRole) Setl(s ISend) {
+func (this *SCreateRole) Setl(s msgMgr.ISend) {
 	this.l = s
 }
 
-func (this *SCreateRole) Getl() ISend {
+func (this *SCreateRole) Getl() msgMgr.ISend {
 	return this.l
 }
 
-func (this *SCreateRole) Setg(s ISend) {
+func (this *SCreateRole) Setg(s msgMgr.ISend) {
 	this.g = s
 }
 
-func (this *SCreateRole) Getg() ISend {
+func (this *SCreateRole) Getg() msgMgr.ISend {
 	return this.g
 }
 
-func (this *SCreateRole) Setw(w ISend) {
+func (this *SCreateRole) Setw(w msgMgr.ISend) {
 	this.w = w
 }
 
-func (this *SCreateRole) Getw() ISend {
+func (this *SCreateRole) Getw() msgMgr.ISend {
 	return this.w
 }
 
@@ -65,8 +66,8 @@ func (this *SCreateRole) Unmarshal(data []byte) error {
 	return err
 }
 
-func (this *SCreateRole) Send2Link(msg MsgInfo) error {
-	data, err := MarshalMsg(msg)
+func (this *SCreateRole) Send2Link(msg msgMgr.MsgInfo) error {
+	data, err := msgMgr.MarshalMsg(msg)
 	if err != nil {
 		return err
 	}

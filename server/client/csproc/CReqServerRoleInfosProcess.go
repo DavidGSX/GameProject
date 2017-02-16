@@ -1,8 +1,10 @@
-package csmsg
+package csproc
 
 import (
 	"gameproject/common"
 	"gameproject/common/cache"
+	"gameproject/server/client/csmsg"
+	"gameproject/server/client/msgMgr"
 	"gameproject/server/world/swmsg"
 	"gameproject/world/msgProto"
 	"log"
@@ -11,8 +13,20 @@ import (
 )
 
 type CReqServerRoleInfosProcess struct {
-	msg   *CReqServerRoleInfos
+	msg   *csmsg.CReqServerRoleInfos
 	trans *common.Trans
+}
+
+func (this *CReqServerRoleInfosProcess) Clone() msgMgr.IProcess {
+	return new(CReqServerRoleInfosProcess)
+}
+
+func (this *CReqServerRoleInfosProcess) SetMsg(m msgMgr.MsgInfo) {
+	this.msg = m.(*csmsg.CReqServerRoleInfos)
+}
+
+func (this *CReqServerRoleInfosProcess) SetTrans(t *common.Trans) {
+	this.trans = t
 }
 
 func (this *CReqServerRoleInfosProcess) Process() bool {

@@ -3,19 +3,20 @@ package csmsg
 import (
 	"gameproject/common"
 	"gameproject/server/client/csproto"
+	"gameproject/server/client/msgMgr"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type CReqServerRoleInfos struct {
 	csproto.CReqServerRoleInfos
-	l ISend  // Link缩写
-	g ISend  // Global缩写
-	w ISend  // World缩写
+	l msgMgr.ISend  // Link缩写
+	g msgMgr.ISend  // Global缩写
+	w msgMgr.ISend  // World缩写
 	r uint64 // RoleId缩写
 }
 
-func (this *CReqServerRoleInfos) Clone() MsgInfo {
+func (this *CReqServerRoleInfos) Clone() msgMgr.MsgInfo {
 	return new(CReqServerRoleInfos)
 }
 
@@ -36,27 +37,27 @@ func (this *CReqServerRoleInfos) Getr() uint64 {
 	return this.r
 }
 
-func (this *CReqServerRoleInfos) Setl(s ISend) {
+func (this *CReqServerRoleInfos) Setl(s msgMgr.ISend) {
 	this.l = s
 }
 
-func (this *CReqServerRoleInfos) Getl() ISend {
+func (this *CReqServerRoleInfos) Getl() msgMgr.ISend {
 	return this.l
 }
 
-func (this *CReqServerRoleInfos) Setg(s ISend) {
+func (this *CReqServerRoleInfos) Setg(s msgMgr.ISend) {
 	this.g = s
 }
 
-func (this *CReqServerRoleInfos) Getg() ISend {
+func (this *CReqServerRoleInfos) Getg() msgMgr.ISend {
 	return this.g
 }
 
-func (this *CReqServerRoleInfos) Setw(w ISend) {
+func (this *CReqServerRoleInfos) Setw(w msgMgr.ISend) {
 	this.w = w
 }
 
-func (this *CReqServerRoleInfos) Getw() ISend {
+func (this *CReqServerRoleInfos) Getw() msgMgr.ISend {
 	return this.w
 }
 
@@ -65,8 +66,8 @@ func (this *CReqServerRoleInfos) Unmarshal(data []byte) error {
 	return err
 }
 
-func (this *CReqServerRoleInfos) Send2Link(msg MsgInfo) error {
-	data, err := MarshalMsg(msg)
+func (this *CReqServerRoleInfos) Send2Link(msg msgMgr.MsgInfo) error {
+	data, err := msgMgr.MarshalMsg(msg)
 	if err != nil {
 		return err
 	}
@@ -75,8 +76,8 @@ func (this *CReqServerRoleInfos) Send2Link(msg MsgInfo) error {
 }
 
 func (this *CReqServerRoleInfos) Process(t *common.Trans) bool {
-	p := new(CReqServerRoleInfosProcess)
-	p.msg = this
-	p.trans = t
+	p := msgMgr.GetProc("CReqServerRoleInfos")
+	p.SetMsg(this)
+	p.SetTrans(t)
 	return p.Process()
 }

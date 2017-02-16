@@ -3,19 +3,20 @@ package csmsg
 import (
 	"gameproject/common"
 	"gameproject/server/client/csproto"
+	"gameproject/server/client/msgMgr"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type CCreateRole struct {
 	csproto.CCreateRole
-	l ISend  // Link缩写
-	g ISend  // Global缩写
-	w ISend  // World缩写
+	l msgMgr.ISend  // Link缩写
+	g msgMgr.ISend  // Global缩写
+	w msgMgr.ISend  // World缩写
 	r uint64 // RoleId缩写
 }
 
-func (this *CCreateRole) Clone() MsgInfo {
+func (this *CCreateRole) Clone() msgMgr.MsgInfo {
 	return new(CCreateRole)
 }
 
@@ -36,27 +37,27 @@ func (this *CCreateRole) Getr() uint64 {
 	return this.r
 }
 
-func (this *CCreateRole) Setl(s ISend) {
+func (this *CCreateRole) Setl(s msgMgr.ISend) {
 	this.l = s
 }
 
-func (this *CCreateRole) Getl() ISend {
+func (this *CCreateRole) Getl() msgMgr.ISend {
 	return this.l
 }
 
-func (this *CCreateRole) Setg(s ISend) {
+func (this *CCreateRole) Setg(s msgMgr.ISend) {
 	this.g = s
 }
 
-func (this *CCreateRole) Getg() ISend {
+func (this *CCreateRole) Getg() msgMgr.ISend {
 	return this.g
 }
 
-func (this *CCreateRole) Setw(w ISend) {
+func (this *CCreateRole) Setw(w msgMgr.ISend) {
 	this.w = w
 }
 
-func (this *CCreateRole) Getw() ISend {
+func (this *CCreateRole) Getw() msgMgr.ISend {
 	return this.w
 }
 
@@ -65,8 +66,8 @@ func (this *CCreateRole) Unmarshal(data []byte) error {
 	return err
 }
 
-func (this *CCreateRole) Send2Link(msg MsgInfo) error {
-	data, err := MarshalMsg(msg)
+func (this *CCreateRole) Send2Link(msg msgMgr.MsgInfo) error {
+	data, err := msgMgr.MarshalMsg(msg)
 	if err != nil {
 		return err
 	}
@@ -75,8 +76,8 @@ func (this *CCreateRole) Send2Link(msg MsgInfo) error {
 }
 
 func (this *CCreateRole) Process(t *common.Trans) bool {
-	p := new(CCreateRoleProcess)
-	p.msg = this
-	p.trans = t
+	p := msgMgr.GetProc("CCreateRole")
+	p.SetMsg(this)
+	p.SetTrans(t)
 	return p.Process()
 }

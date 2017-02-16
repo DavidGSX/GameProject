@@ -1,14 +1,28 @@
-package csmsg
+package csproc
 
 import (
 	"gameproject/common"
+	"gameproject/server/client/csmsg"
+	"gameproject/server/client/msgMgr"
 	"gameproject/server/db/table"
 	"log"
 )
 
 type CAddLevelProcess struct {
-	msg   *CAddLevel
+	msg   *csmsg.CAddLevel
 	trans *common.Trans
+}
+
+func (this *CAddLevelProcess) Clone() msgMgr.IProcess {
+	return new(CAddLevelProcess)
+}
+
+func (this *CAddLevelProcess) SetMsg(m msgMgr.MsgInfo) {
+	this.msg = m.(*csmsg.CAddLevel)
+}
+
+func (this *CAddLevelProcess) SetTrans(t *common.Trans) {
+	this.trans = t
 }
 
 func (this *CAddLevelProcess) Process() bool {
@@ -18,7 +32,7 @@ func (this *CAddLevelProcess) Process() bool {
 		}
 	}()
 
-	sendInfo := &SLevelInfo{}
+	sendInfo := &csmsg.SLevelInfo{}
 	roleId := this.msg.Getr()
 
 	v := table.GetProperty(this.trans, roleId)

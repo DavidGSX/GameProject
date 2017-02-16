@@ -4,6 +4,7 @@ import (
 	"gameproject/common"
 	"gameproject/common/cache"
 	"gameproject/server/client/csmsg"
+	"gameproject/server/client/csproc"
 	"gameproject/server/config"
 	"gameproject/server/manager"
 	"gameproject/server/rpcMgr"
@@ -32,6 +33,7 @@ func main() {
 
 	// 服务器协议初始化
 	csmsg.Init()
+	csproc.Init()
 	swmsg.Init()
 
 	// 数据缓存和数据库连接池初始化

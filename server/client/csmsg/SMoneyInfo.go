@@ -3,19 +3,20 @@ package csmsg
 import (
 	"gameproject/common"
 	"gameproject/server/client/csproto"
+	"gameproject/server/client/msgMgr"
 
 	"github.com/golang/protobuf/proto"
 )
 
 type SMoneyInfo struct {
 	csproto.SMoneyInfo
-	l ISend  // Link缩写
-	g ISend  // Global缩写
-	w ISend  // World缩写
+	l msgMgr.ISend  // Link缩写
+	g msgMgr.ISend  // Global缩写
+	w msgMgr.ISend  // World缩写
 	r uint64 // RoleId缩写
 }
 
-func (this *SMoneyInfo) Clone() MsgInfo {
+func (this *SMoneyInfo) Clone() msgMgr.MsgInfo {
 	return new(SMoneyInfo)
 }
 
@@ -36,27 +37,27 @@ func (this *SMoneyInfo) Getr() uint64 {
 	return this.r
 }
 
-func (this *SMoneyInfo) Setl(s ISend) {
+func (this *SMoneyInfo) Setl(s msgMgr.ISend) {
 	this.l = s
 }
 
-func (this *SMoneyInfo) Getl() ISend {
+func (this *SMoneyInfo) Getl() msgMgr.ISend {
 	return this.l
 }
 
-func (this *SMoneyInfo) Setg(s ISend) {
+func (this *SMoneyInfo) Setg(s msgMgr.ISend) {
 	this.g = s
 }
 
-func (this *SMoneyInfo) Getg() ISend {
+func (this *SMoneyInfo) Getg() msgMgr.ISend {
 	return this.g
 }
 
-func (this *SMoneyInfo) Setw(w ISend) {
+func (this *SMoneyInfo) Setw(w msgMgr.ISend) {
 	this.w = w
 }
 
-func (this *SMoneyInfo) Getw() ISend {
+func (this *SMoneyInfo) Getw() msgMgr.ISend {
 	return this.w
 }
 
@@ -65,8 +66,8 @@ func (this *SMoneyInfo) Unmarshal(data []byte) error {
 	return err
 }
 
-func (this *SMoneyInfo) Send2Link(msg MsgInfo) error {
-	data, err := MarshalMsg(msg)
+func (this *SMoneyInfo) Send2Link(msg msgMgr.MsgInfo) error {
+	data, err := msgMgr.MarshalMsg(msg)
 	if err != nil {
 		return err
 	}

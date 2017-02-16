@@ -2,10 +2,10 @@ package swmsg
 
 import (
 	"gameproject/common"
+	"gameproject/server/client/csmsg"
 	"gameproject/server/client/csproto"
+	"gameproject/server/client/msgMgr"
 	"log"
-
-	"github.com/golang/protobuf/proto"
 )
 
 type W2SRoleInfoResponseProcess struct {
@@ -20,7 +20,7 @@ func (this *W2SRoleInfoResponseProcess) Process() bool {
 		}
 	}()
 
-	sendInfo := &csproto.SServerRoleInfos{}
+	sendInfo := &csmsg.SServerRoleInfos{}
 	sendInfo.RoleId = this.msg.RoleId
 
 	if this.msg.Info != nil {
@@ -38,14 +38,10 @@ func (this *W2SRoleInfoResponseProcess) Process() bool {
 		}
 	}
 
-	data, err := proto.Marshal(sendInfo)
+	data, err := msgMgr.MarshalMsg(sendInfo)
 	if err != nil {
 		log.Panic("Marshal SServerRoleInfos Error,", err)
 	}
-	oct := &common.Octets{}
-	oct.MarshalUint32(uint32(len(data)))
-	oct.MarshalUint32(1014)
-	oct.MarshalBytesOnly(data)
-	this.msg.Gets().SendByRoleIds([]uint64{sendInfo.RoleId}, oct.GetBuf())
+	this.msg.Gets().SendByRoleIds([]uint64{sendInfo.RoleId}, data)
 	return true
 }
