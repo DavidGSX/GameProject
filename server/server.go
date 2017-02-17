@@ -49,7 +49,7 @@ func main() {
 
 	// RPC初始化
 	rpcMgr.RPCInit(cfg)
-	<-time.After(3e9) // 2秒初始化时间
+	<-time.After(2e9) // 2秒初始化时间
 
 	go manager.LinkMgrInit(cfg)
 	go manager.GlobalMgrInit(cfg)

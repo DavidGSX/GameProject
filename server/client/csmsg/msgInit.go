@@ -1,8 +1,6 @@
 package csmsg
 
-import (
-	"gameproject/server/client/msgMgr"
-)
+import "gameproject/server/client/msgMgr"
 
 func Init() {
 	msgMgr.AddMsg(1001, new(CUserLogin))

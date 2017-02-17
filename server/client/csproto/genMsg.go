@@ -154,10 +154,39 @@ func (this *MsgMgr) Gen() {
 		log.Panic("Write MsgMgr.go Error:", err)
 	}
 
+	msgContent := make([]byte, 0)
+	msgContent = append(msgContent, []byte("package csmsg\n")...)
+	msgContent = append(msgContent, []byte("\n")...)
+	msgContent = append(msgContent, []byte("import \"gameproject/server/client/msgMgr\"\n")...)
+	msgContent = append(msgContent, []byte("\n")...)
+	msgContent = append(msgContent, []byte("func Init() {\n")...)
+
+	procContent := make([]byte, 0)
+	procContent = append(procContent, []byte("package csproc\n")...)
+	procContent = append(procContent, []byte("\n")...)
+	procContent = append(procContent, []byte("import \"gameproject/server/client/msgMgr\"\n")...)
+	procContent = append(procContent, []byte("\n")...)
+	procContent = append(procContent, []byte("func Init() {\n")...)
 	for _, k := range types {
 		v := this.Type2Name[k]
 		this.GenMsgInfo(v)
 		GenMsgProcess(v)
+		msgContent = append(msgContent, []byte("	msgMgr.AddMsg("+strconv.Itoa(k)+", new("+v+"))\n")...)
+		if len(v) > 0 && v[0] != 'S' {
+			procContent = append(procContent, []byte("	msgMgr.AddProc(\""+v+"\", new("+v+"Process))\n")...)
+		}
+	}
+	msgContent = append(msgContent, []byte("}\n")...)
+	procContent = append(procContent, []byte("}\n")...)
+
+	err = ioutil.WriteFile("../csmsg/msgInit.go", msgContent, 0666)
+	if err != nil {
+		log.Panic("Write msgInit.go Error:", err)
+	}
+
+	err = ioutil.WriteFile("../csproc/procInit.go", procContent, 0666)
+	if err != nil {
+		log.Panic("Write procInit.go Error:", err)
 	}
 }
 
@@ -278,16 +307,30 @@ func GenMsgProcess(name string) {
 	}
 
 	content := make([]byte, 0)
-	content = append(content, []byte("package csmsg\n")...)
+	content = append(content, []byte("package csproc\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("import (\n")...)
 	content = append(content, []byte("	\"gameproject/common\"\n")...)
+	content = append(content, []byte("	\"gameproject/server/client/csmsg\"\n")...)
+	content = append(content, []byte("	\"gameproject/server/client/msgMgr\"\n")...)
 	content = append(content, []byte("	\"log\"\n")...)
 	content = append(content, []byte(")\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("type "+name+"Process struct {\n")...)
-	content = append(content, []byte("	msg   *"+name+"\n")...)
+	content = append(content, []byte("	msg   *csmsg."+name+"\n")...)
 	content = append(content, []byte("	trans *common.Trans\n")...)
+	content = append(content, []byte("}\n")...)
+	content = append(content, []byte("\n")...)
+	content = append(content, []byte("func (this *"+name+"Process) Clone() msgMgr.IProcess {\n")...)
+	content = append(content, []byte("	return new("+name+"Process)\n")...)
+	content = append(content, []byte("}\n")...)
+	content = append(content, []byte("\n")...)
+	content = append(content, []byte("func (this *"+name+"Process) SetMsg(m msgMgr.MsgInfo) {\n")...)
+	content = append(content, []byte("	this.msg = m.(*csmsg."+name+")\n")...)
+	content = append(content, []byte("}\n")...)
+	content = append(content, []byte("\n")...)
+	content = append(content, []byte("func (this *"+name+"Process) SetTrans(t *common.Trans) {\n")...)
+	content = append(content, []byte("	this.trans = t\n")...)
 	content = append(content, []byte("}\n")...)
 	content = append(content, []byte("\n")...)
 	content = append(content, []byte("func (this *"+name+"Process) Process() bool {\n")...)

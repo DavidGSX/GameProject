@@ -1,8 +1,6 @@
 package csproc
 
-import (
-	"gameproject/server/client/msgMgr"
-)
+import "gameproject/server/client/msgMgr"
 
 func Init() {
 	msgMgr.AddProc("CUserLogin", new(CUserLoginProcess))
